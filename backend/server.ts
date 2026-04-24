@@ -26,7 +26,7 @@ app.get("/", (req: Request, res: Response) => {
 app.get("/test-create-user", async (req: Request, res: Response) => {
   try {
     const hashedPassword = await bcrypt.hash("1234", 10);
-    const email = `haran@gmail.com`
+    const email = `haranckkk@gmail.com`
     
     const user = await prisma.user.create({
       data: {
