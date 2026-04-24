@@ -1,10 +1,15 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const prismaClientSingleton = () => {
-  return new PrismaClient();
+  return new PrismaClient({
+    adapter: new PrismaLibSql({
+      url: process.env.DATABASE_URL!,
+    }),
+  });
 };
 
 type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
