@@ -25,8 +25,16 @@ export class UserController {
     login = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password } = req.body;
-            const user = await this.loginService.login({ email, password });
-            res.status(200).json({ message: "User logged in successfully", user });
+            const response = await this.loginService.login({ email, password });
+
+            res.cookie("refreshToken", response.refreshToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "strict",
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            });
+
+            res.status(200).json({ message: "User logged in successfully", user: response.user, accessToken: response.accessToken });
         } catch (error: any) {
             res.status(500).json({ message: "Failed to login user", error: error.message });
         }
@@ -34,7 +42,13 @@ export class UserController {
 
     logout = async (req: Request, res: Response): Promise<void> => {
         try {
-            await this.logoutService.logout();
+            const authHeader = req.headers.authorization;
+            if (!authHeader) {
+                res.status(401).json({ message: "No token provided" });
+                return;
+            }
+            const token = authHeader.split(" ")[1];
+            await this.logoutService.logout(token);
             res.status(200).json({ message: "User logged out successfully" });
         } catch (error: any) {
             res.status(500).json({ message: "Failed to logout user", error: error.message });

@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { userController } from "../DI/resolver";
+import { userController, authMiddleware } from "../DI/resolver";
 
 const router = Router()
 
-router.post('/signup',userController.signup)
-router.post('/login',userController.login)
-router.post('/logout',userController.logout)
+router.post('/signup', userController.signup)
+router.post('/login', userController.login)
+router.post('/logout', authMiddleware.authenticate, userController.logout)
 
 export default router

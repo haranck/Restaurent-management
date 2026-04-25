@@ -13,6 +13,8 @@ import { IRestaurantDeleteService } from "../services/restaurant/delete/IRestaur
 import { RestaurantDeleteService } from "../services/restaurant/delete/RestaurantDeleteService";
 import { IFetchRestaurantService } from "../services/restaurant/fetch/IFetchRestaurantService";
 import { FetchRestaurantService } from "../services/restaurant/fetch/FetchRestaurantService";
+import { IJwtService } from "../services/jwt/IJwtServices";
+import { JwtService } from "../services/jwt/JwtServices";
 
 export class ServiceModule {
     static registerModules(): void {
@@ -40,6 +42,10 @@ export class ServiceModule {
 
         container.register<IFetchRestaurantService>("IFetchRestaurantService", {
             useClass: FetchRestaurantService
+        });
+
+        container.register<IJwtService>("IJwtService", {
+            useClass: JwtService
         });
     }
 }
