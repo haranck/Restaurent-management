@@ -9,7 +9,7 @@ export class UserController {
     constructor(
         @inject('IRegisterUserService') private registerService: IRegisterUserService,
         @inject('ILoginUserService') private loginService: ILoginUserService,
-        // @inject('ILogoutUserService') private logoutService: ILogoutUserService,
+        @inject('ILogoutUserService') private logoutService: ILogoutUserService,
     ) { }
 
     signup = async (req: Request, res: Response): Promise<void> => {
@@ -32,13 +32,12 @@ export class UserController {
         }
     }
 
-    // logout = async (req: Request, res: Response): Promise<void> => {
-    //     try {
-    //         const { email, password } = req.body;
-    //         const user = await this.logoutService.logout({ email, password });
-    //         res.status(200).json({ message: "User logged out successfully", user });
-    //     } catch (error: any) {
-    //         res.status(500).json({ message: "Failed to logout user", error: error.message });
-    //     }
-    // }
+    logout = async (req: Request, res: Response): Promise<void> => {
+        try {
+            await this.logoutService.logout();
+            res.status(200).json({ message: "User logged out successfully" });
+        } catch (error: any) {
+            res.status(500).json({ message: "Failed to logout user", error: error.message });
+        }
+    }
 }
