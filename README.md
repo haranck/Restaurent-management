@@ -1,6 +1,9 @@
 # 🍽️ Restaurant Management System
 
-A full-stack web application for managing restaurant operations, built with a modern and scalable tech stack.
+Built a full-stack restaurant management system using TypeScript and modern web technologies.
+Implemented secure JWT-based authentication with role-based access control.
+Designed using clean architecture principles for scalability and maintainability.
+Integrated PostgreSQL, Prisma, and Redis for efficient data handling and performance.
 
 ---
 
