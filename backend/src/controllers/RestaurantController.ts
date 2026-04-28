@@ -16,8 +16,15 @@ export class RestaurantController {
 
     create = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { name, address, contact } = req.body;
-            const restaurant = await this.createService.create({ name, address, contact });
+            const { name, description, phone, foodType, nearestPlace, address } = req.body;
+            const restaurant = await this.createService.create({ 
+                name, 
+                description, 
+                phone, 
+                foodType, 
+                nearestPlace, 
+                address 
+            });
             res.status(201).json({ message: "Restaurant created successfully", restaurant });
         } catch (error: any) {
             res.status(500).json({ message: "Failed to create restaurant", error: error.message });
@@ -27,8 +34,15 @@ export class RestaurantController {
     update = async (req: Request, res: Response): Promise<void> => {
         try {
             const { id } = req.params;
-            const { name, address, contact } = req.body;
-            const restaurant = await this.updateService.update(id as string, { name, address, contact });
+            const { name, description, phone, foodType, nearestPlace, address } = req.body;
+            const restaurant = await this.updateService.update(id as string, { 
+                name, 
+                description, 
+                phone, 
+                foodType, 
+                nearestPlace, 
+                address 
+            });
             res.status(200).json({ message: "Restaurant updated successfully", restaurant });
         } catch (error: any) {
             res.status(500).json({ message: "Failed to update restaurant", error: error.message });

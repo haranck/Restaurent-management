@@ -1,5 +1,6 @@
 import { Restaurant } from "@prisma/client";
+import { CreateRestaurantDTO } from "../../../DTO/RestaurantDTO";
 
 export interface IRestaurantCreateService {
-    create(data: { name: string; address: string; contact: string }): Promise<Restaurant>;
+    create(data: CreateRestaurantDTO): Promise<Restaurant>;
 }

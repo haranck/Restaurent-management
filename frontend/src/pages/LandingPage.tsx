@@ -10,9 +10,10 @@ import {
   ArrowRight,
   Star,
 } from "lucide-react";
-import Navbar from "../layouts/Navbar";
+import LandingNavbar from "../layouts/LandingNavbar";
 import Footer from "../layouts/Footer";
 import type { RootState } from "../store/store";
+import { useEffect } from "react";
 
 const FEATURES = [
   {
@@ -79,6 +80,12 @@ export const LandingPage = () => {
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
 
+  useEffect(() => {
+    if (user) {
+      navigate("/home");
+    }
+  }, [user, navigate]);
+
   return (
     <div
       style={{
@@ -89,7 +96,7 @@ export const LandingPage = () => {
         overflowX: "hidden",
       }}
     >
-      <Navbar />
+      <LandingNavbar />
 
       {/* ── HERO ── */}
       <section
