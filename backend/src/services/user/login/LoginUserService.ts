@@ -17,6 +17,7 @@ export class LoginUserService implements ILoginUserService {
         if (!user) {
             throw new Error("User not found");
         }
+
         const isPasswordValid = await comparePassword(password, user.password);
         if (!isPasswordValid) {
             throw new Error("Invalid password");

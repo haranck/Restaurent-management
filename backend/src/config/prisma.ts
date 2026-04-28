@@ -1,4 +1,13 @@
 import { PrismaClient } from "@prisma/client";
+console.log("DEBUG: PrismaClient imported from @prisma/client");
+import path from "path";
+try {
+    const clientPath = require.resolve("@prisma/client");
+    console.log("DEBUG: @prisma/client resolved path:", clientPath);
+} catch (e) {
+    console.log("DEBUG: could not resolve @prisma/client path");
+}
+
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import dotenv from "dotenv";

@@ -34,7 +34,6 @@ export class AuthMiddleware {
 
             const token = authHeader.split(" ")[1];
 
-            // 1.5 Check if token is blacklisted
             const isBlacklisted = await this._blacklistRepository.isBlacklisted(token);
             if (isBlacklisted) {
                 res.status(HTTP_STATUS.UNAUTHORIZED).json({ 
@@ -43,17 +42,14 @@ export class AuthMiddleware {
                 return;
             }
 
-            // 2. Verify JWT token
             const payload = this._jwtService.verifyAccessToken(token);
             if (!payload) {
-                // This might be unreachable if verifyAccessToken throws, but good for type safety if it returned null
                 res.status(HTTP_STATUS.UNAUTHORIZED).json({ 
                     message: ERROR_MESSAGES.INVALID_TOKEN 
                 });
                 return;
             }
 
-            // 3. Verify user still exists in the database
             const user = await this._userRepository.findById(payload.userId);
             if (!user) {
                 res.status(HTTP_STATUS.UNAUTHORIZED).json({ 
@@ -62,7 +58,6 @@ export class AuthMiddleware {
                 return;
             }
 
-            // 4. Attach user payload to request and proceed
             req.user = payload;
             next();
 

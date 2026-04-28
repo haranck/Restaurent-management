@@ -15,6 +15,8 @@ import { IFetchRestaurantService } from "../services/restaurant/fetch/IFetchRest
 import { FetchRestaurantService } from "../services/restaurant/fetch/FetchRestaurantService";
 import { IJwtService } from "../services/jwt/IJwtServices";
 import { JwtService } from "../services/jwt/JwtServices";
+import { IRefreshTokenService } from "../services/refreshToken/IRefreshTokenService";
+import { RefreshTokenService } from "../services/refreshToken/RefreshTokenService";
 
 export class ServiceModule {
     static registerModules(): void {
@@ -46,6 +48,10 @@ export class ServiceModule {
 
         container.register<IJwtService>("IJwtService", {
             useClass: JwtService
+        });
+
+        container.register<IRefreshTokenService>("IRefreshTokenService", {
+            useClass: RefreshTokenService
         });
     }
 }
