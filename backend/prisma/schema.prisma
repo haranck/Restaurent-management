@@ -13,16 +13,21 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  restaurants Restaurant[]
 }
 
 model Restaurant {
   id           String   @id @default(uuid())
   name         String
   description  String?
+  imageUrl    String? 
+  imageId     String? 
   phone        String
   foodType     FoodType
   nearestPlace String?
   address      Address?
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

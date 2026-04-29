@@ -6,10 +6,14 @@ import { CreateRestaurantDTO, UpdateRestaurantDTO } from "../../DTO/RestaurantDT
 @injectable()
 export class RestaurantRepository implements IRestaurantRepository {
   async create(data: CreateRestaurantDTO) {
-    const { address, ...rest } = data;
+    const { address, userId, ...rest } = data;
+    
     return prisma.restaurant.create({
       data: {
         ...rest,
+        user: {
+          connect: { id: userId }
+        },
         address: {
           create: address
         }
@@ -20,6 +24,19 @@ export class RestaurantRepository implements IRestaurantRepository {
 
   async findAll() {
     return prisma.restaurant.findMany({
+      include: { 
+        address: true, 
+        user: { 
+          select: { name: true, email: true } 
+        } 
+      },
+      orderBy: { createdAt: "desc" }
+    });
+  }
+
+  async findByUserId(userId: string) {
+    return prisma.restaurant.findMany({
+      where: { userId },
       include: { address: true },
       orderBy: { createdAt: "desc" }
     });
@@ -34,7 +51,7 @@ export class RestaurantRepository implements IRestaurantRepository {
 
   async update(id: string, data: UpdateRestaurantDTO) {
     const { address, ...rest } = data;
-    
+
     return prisma.restaurant.update({
       where: { id },
       data: {

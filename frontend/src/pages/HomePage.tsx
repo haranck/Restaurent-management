@@ -1,170 +1,186 @@
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import { UtensilsCrossed, Plus, TrendingUp, Users, ShoppingBag, Star, ArrowRight, ChefHat, BarChart3, Clock, Sparkles } from "lucide-react";
 import type { RootState } from "../store/store";
-import { clearAuth } from "../store/slice/authSlice";
-import { clearToken } from "../store/slice/tokenSlice";
 import Navbar from "../layouts/Navbar";
 import { Shop } from "../components/Shop/Shop";
 import { CreateRestaurantModal } from "../components/modals/CreateRestaurantModal";
-import { useFetchAllRestaurant } from "../hooks/Restaurant/RestaurantHooks";
+import { useFetchMyRestaurants } from "../hooks/Restaurant/RestaurantHooks";
+import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { cn } from "@/lib/utils";
+
 
 export const HomePage = () => {
     const user = useSelector((state: RootState) => state.auth.user);
+    const restaurants = useSelector((state: RootState) => state.restaurant.myRestaurants);
     const navigate = useNavigate();
-    const dispatch = useDispatch();
     const [createOpen, setCreateOpen] = useState(false);
-    const { data } = useFetchAllRestaurant();
-    // Backend returns { message: '...', restaurants: [...] }
-    const restaurants = Array.isArray(data?.restaurants)
-        ? data.restaurants
-        : Array.isArray(data?.data)
-            ? data.data
-            : Array.isArray(data)
-                ? data
-                : [];
+    const { isLoading, isError } = useFetchMyRestaurants();
+
     const totalRestaurants: number = restaurants.length;
 
     useEffect(() => { if (!user) navigate("/login"); }, [user, navigate]);
 
-    const handleLogout = () => { dispatch(clearAuth()); dispatch(clearToken()); navigate("/login"); };
-    void handleLogout;
-
     const stats = [
-        { icon: <ShoppingBag size={18} />, label: "Restaurants", value: String(totalRestaurants) },
-        { icon: <TrendingUp size={18} />, label: "Active Orders", value: "—" },
-        { icon: <Users size={18} />, label: "Staff Members", value: "—" },
-        { icon: <Star size={18} />, label: "Avg. Rating", value: "—" },
+        { icon: <ShoppingBag size={18} />, label: "Restaurants", value: String(totalRestaurants), color: "text-green-500", bg: "bg-green-500/10" },
+        { icon: <TrendingUp size={18} />, label: "Active Orders", value: "—", color: "text-yellow-500", bg: "bg-yellow-500/10" },
+        { icon: <Users size={18} />, label: "Staff Members", value: "—", color: "text-blue-500", bg: "bg-blue-500/10" },
+        { icon: <Star size={18} />, label: "Avg. Rating", value: "—", color: "text-purple-500", bg: "bg-purple-500/10" },
     ];
 
     const features = [
-        { icon: <ChefHat size={20} />, title: "Menu Management", desc: "Craft menus in real-time with intuitive tools.", color: "#86bb3c" },
-        { icon: <BarChart3 size={20} />, title: "Analytics", desc: "Deep insights into revenue and peak hours.", color: "#f5c518" },
-        { icon: <Clock size={20} />, title: "Order Tracking", desc: "Live updates for kitchen and delivery teams.", color: "#3b9eff" },
-        { icon: <Users size={20} />, title: "Staff Management", desc: "Schedule shifts and manage payroll easily.", color: "#a78bfa" },
+        { icon: <ChefHat size={20} />, title: "Menu Management", desc: "Craft menus in real-time with intuitive tools.", color: "text-green-500", bg: "bg-green-500/10", border: "border-green-500/20" },
+        { icon: <BarChart3 size={20} />, title: "Analytics", desc: "Deep insights into revenue and peak hours.", color: "text-yellow-500", bg: "bg-yellow-500/10", border: "border-yellow-500/20" },
+        { icon: <Clock size={20} />, title: "Order Tracking", desc: "Live updates for kitchen and delivery teams.", color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+        { icon: <Users size={20} />, title: "Staff Management", desc: "Schedule shifts and manage payroll easily.", color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20" },
     ];
 
     return (
-        <div style={{ minHeight: "100vh", background: "#060d06", fontFamily: "'Inter',system-ui,sans-serif", color: "#e8f0d8", overflowX: "hidden" }}>
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-                *{box-sizing:border-box}
-                @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-                @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-                @keyframes orbDrift{0%,100%{transform:translate(0,0)}50%{transform:translate(18px,-14px)}}
-                @keyframes pulseGlow{0%,100%{box-shadow:0 8px 32px rgba(134,187,60,0.3)}50%{box-shadow:0 8px 48px rgba(134,187,60,0.55)}}
-                .hp-cta:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 16px 48px rgba(134,187,60,0.55)!important}
-                .hp-outline:hover{background:rgba(134,187,60,0.12)!important;border-color:rgba(134,187,60,0.4)!important;color:#86bb3c!important}
-                .hp-stat:hover{transform:translateY(-3px);border-color:rgba(134,187,60,0.28)!important}
-                .hp-feat:hover{transform:translateY(-5px);border-color:rgba(134,187,60,0.22)!important;box-shadow:0 20px 60px rgba(0,0,0,0.5)!important}
-                .hp-cta,.hp-outline,.hp-stat,.hp-feat{transition:all 0.22s ease}
-            `}</style>
-
+        <div className="min-h-screen bg-[#050505] text-zinc-100 font-sans selection:bg-green-500/30">
             <Navbar />
 
-            {/* HERO */}
-            <section style={{ position: "relative", paddingTop: 110, paddingBottom: 72, padding: "110px 24px 72px", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: "5%", right: "6%", width: 440, height: 440, borderRadius: "50%", background: "radial-gradient(circle,rgba(134,187,60,0.08) 0%,transparent 65%)", animation: "orbDrift 9s ease-in-out infinite", pointerEvents: "none" }} />
-                <div style={{ position: "absolute", bottom: "-8%", left: "4%", width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle,rgba(245,197,24,0.05) 0%,transparent 65%)", animation: "orbDrift 13s ease-in-out infinite reverse", pointerEvents: "none" }} />
-                <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(134,187,60,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(134,187,60,0.03) 1px,transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
+            {/* Hero Section */}
+            <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+                {/* Background Orbs */}
+                <div className="absolute top-1/4 -right-20 w-96 h-96 bg-green-600/10 rounded-full blur-[120px] animate-pulse pointer-events-none" />
+                <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-yellow-600/5 rounded-full blur-[100px] pointer-events-none" />
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
 
-                <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 48, flexWrap: "wrap", position: "relative", zIndex: 1 }}>
-                    {/* Text */}
-                    <div style={{ flex: "1 1 480px", animation: "fadeUp 0.6s ease both" }}>
-                        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(134,187,60,0.1)", border: "1px solid rgba(134,187,60,0.25)", borderRadius: 99, padding: "5px 14px 5px 8px", marginBottom: 22 }}>
-                            <div style={{ width: 22, height: 22, borderRadius: "50%", background: "linear-gradient(135deg,#86bb3c,#f5c518)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                <Sparkles size={11} color="#fff" />
-                            </div>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: "#86bb3c", letterSpacing: "0.04em" }}>Welcome back, {user?.name ?? "Chef"}!</span>
-                        </div>
+                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10">
+                    <div className="flex-1 space-y-8 text-center lg:text-left animate-in fade-in slide-in-from-bottom-8 duration-700">
+                        <Badge variant="outline" className="bg-green-500/10 border-green-500/20 text-green-500 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest gap-2">
+                            <Sparkles size={12} className="animate-pulse" />
+                            Welcome Back, {user?.name ?? "Partner"}
+                        </Badge>
 
-                        <h1 style={{ fontSize: "clamp(30px,5vw,56px)", fontWeight: 900, lineHeight: 1.08, letterSpacing: "-1px", color: "#fff", margin: "0 0 18px" }}>
-                            Manage Your{" "}
-                            <span style={{ background: "linear-gradient(90deg,#86bb3c,#f5c518)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                                Restaurants
-                            </span>{" "}
-                            with Ease
+                        <h1 className="text-5xl md:text-7xl font-black leading-[1.05] tracking-tight text-white">
+                            Elevate Your <br />
+                            <span className="bg-linear-to-r from-green-500 via-green-400 to-yellow-500 bg-clip-text text-transparent">
+                                Restaurant Empire
+                            </span>
                         </h1>
 
-                        <p style={{ fontSize: 15, color: "#5a7048", lineHeight: 1.75, maxWidth: 500, marginBottom: 34 }}>
-                            Your all-in-one platform to add, track, and grow every restaurant. Orders, menus, staff — all from one beautiful dashboard.
+                        <p className="text-zinc-500 text-lg md:text-xl max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
+                            The ultimate control center for modern culinary networks. Manage restaurants, 
+                            track performance, and optimize operations from one stunning dashboard.
                         </p>
 
-                        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                            <button className="hp-cta" onClick={() => setCreateOpen(true)} style={{ display: "flex", alignItems: "center", gap: 9, padding: "13px 26px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#86bb3c,#f5c518)", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: "0 8px 32px rgba(134,187,60,0.38)", animation: "pulseGlow 3s ease-in-out infinite" }}>
-                                <Plus size={16} /> Add Restaurant
-                            </button>
-                            <button className="hp-outline" onClick={() => document.getElementById("shop-section")?.scrollIntoView({ behavior: "smooth" })} style={{ display: "flex", alignItems: "center", gap: 9, padding: "13px 26px", borderRadius: 12, border: "1px solid rgba(134,187,60,0.2)", background: "rgba(134,187,60,0.06)", color: "#a0c870", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
-                                View All <ArrowRight size={15} />
-                            </button>
+                        <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4">
+                            <Button 
+                                onClick={() => setCreateOpen(true)}
+                                size="lg" 
+                                className="h-14 px-8 bg-green-600 hover:bg-green-500 text-white font-black text-base rounded-2xl shadow-2xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                                <Plus className="mr-2" size={20} strokeWidth={3} /> Add Restaurant
+                            </Button>
+                            <Button 
+                                onClick={() => document.getElementById("shop-section")?.scrollIntoView({ behavior: "smooth" })}
+                                size="lg" 
+                                variant="outline"
+                                className="h-14 px-8 border-zinc-800 bg-zinc-900/30 text-zinc-300 hover:bg-zinc-800 rounded-2xl font-bold transition-all"
+                            >
+                                View Directory <ArrowRight className="ml-2" size={18} />
+                            </Button>
                         </div>
                     </div>
 
-                    {/* Floating card */}
-                    <div style={{ animation: "float 5s ease-in-out infinite, fadeUp 0.7s ease 0.15s both", display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-end" }}>
-                        <div style={{ background: "rgba(8,20,8,0.92)", border: "1px solid rgba(134,187,60,0.2)", borderRadius: 22, padding: "26px 30px", boxShadow: "0 24px 64px rgba(0,0,0,0.5)", backdropFilter: "blur(20px)", minWidth: 210 }}>
-                            <div style={{ width: 56, height: 56, borderRadius: 15, background: "linear-gradient(135deg,#86bb3c,#f5c518)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14, boxShadow: "0 8px 24px rgba(134,187,60,0.35)" }}>
-                                <UtensilsCrossed size={24} color="#fff" strokeWidth={2} />
+                    <div className="relative animate-in fade-in zoom-in duration-1000 delay-200">
+                        <div className="absolute inset-0 bg-green-500/20 blur-[60px] rounded-full animate-pulse" />
+                        <Card className="relative bg-zinc-950/80 border-zinc-800 border-2 backdrop-blur-2xl p-8 rounded-[2.5rem] shadow-[0_32px_80px_rgba(0,0,0,0.8)] overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 blur-40px group-hover:bg-green-500/20 transition-colors" />
+                            <div className="flex flex-col items-center text-center gap-6">
+                                <div className="w-20 h-20 rounded-3xl bg-linear-to-br from-green-500 to-yellow-500 flex items-center justify-center shadow-xl shadow-green-500/20 ring-1 ring-white/10">
+                                    <UtensilsCrossed size={32} className="text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Total Assets</p>
+                                    <h3 className="text-6xl font-black text-white tracking-tighter">{totalRestaurants}</h3>
+                                    <p className="text-zinc-400 font-bold mt-1">Live Locations</p>
+                                </div>
+                                <div className="bg-green-500/10 border border-green-500/20 px-4 py-2 rounded-xl flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
+                                    <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">Network Synchronized</span>
+                                </div>
                             </div>
-                            <p style={{ fontSize: 11, color: "#4a6038", margin: "0 0 3px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>Your Network</p>
-                            <p style={{ fontSize: 34, fontWeight: 900, color: "#fff", margin: "0 0 3px" }}>{totalRestaurants}</p>
-                            <p style={{ fontSize: 12, color: "#4a6038", margin: 0 }}>Restaurant{totalRestaurants !== 1 ? "s" : ""} registered</p>
-                        </div>
-                        <div style={{ background: "rgba(245,197,24,0.08)", border: "1px solid rgba(245,197,24,0.18)", borderRadius: 10, padding: "7px 14px", fontSize: 11, fontWeight: 700, color: "#f5c518", display: "flex", alignItems: "center", gap: 7 }}>
-                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f5c518", display: "inline-block" }} />
-                            Dashboard Active
-                        </div>
+                        </Card>
                     </div>
                 </div>
             </section>
 
-            {/* STATS */}
-            <section style={{ borderTop: "1px solid rgba(134,187,60,0.1)", borderBottom: "1px solid rgba(134,187,60,0.1)", background: "rgba(8,18,8,0.6)", padding: "26px 24px" }}>
-                <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 14 }}>
-                    {stats.map(({ icon, label, value }, i) => (
-                        <div key={label} className="hp-stat" style={{ display: "flex", alignItems: "center", gap: 13, padding: "15px 18px", borderRadius: 13, border: "1px solid rgba(134,187,60,0.1)", background: "rgba(10,24,10,0.5)", animation: `fadeUp 0.4s ease ${i * 0.07}s both` }}>
-                            <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(134,187,60,0.12)", border: "1px solid rgba(134,187,60,0.18)", display: "flex", alignItems: "center", justifyContent: "center", color: "#86bb3c", flexShrink: 0 }}>{icon}</div>
-                            <div>
-                                <p style={{ fontSize: 10, color: "#4a6038", fontWeight: 700, margin: "0 0 2px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</p>
-                                <p style={{ fontSize: 20, fontWeight: 900, color: "#c8e0a0", margin: 0 }}>{value}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* FEATURES */}
-            <section style={{ padding: "68px 24px 52px" }}>
-                <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-                    <div style={{ textAlign: "center", marginBottom: 44 }}>
-                        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(245,197,24,0.08)", border: "1px solid rgba(245,197,24,0.2)", borderRadius: 99, padding: "4px 14px", fontSize: 10, fontWeight: 700, color: "#f5c518", letterSpacing: "0.07em", marginBottom: 14 }}>
-                            <Sparkles size={10} /> COMING SOON
-                        </div>
-                        <h2 style={{ fontSize: "clamp(20px,4vw,34px)", fontWeight: 900, color: "#fff", letterSpacing: "-0.5px", margin: "0 0 10px" }}>
-                            Everything to{" "}
-                            <span style={{ background: "linear-gradient(90deg,#86bb3c,#f5c518)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Run a Restaurant</span>
-                        </h2>
-                        <p style={{ color: "#4a6038", fontSize: 14, margin: 0 }}>Powerful tools on their way — stay tuned.</p>
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 16 }}>
-                        {features.map(({ icon, title, desc, color }, i) => (
-                            <div key={title} className="hp-feat" style={{ background: "rgba(8,18,8,0.7)", border: "1px solid rgba(134,187,60,0.1)", borderRadius: 18, padding: "22px 22px 22px", position: "relative", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.3)", animation: `fadeUp 0.4s ease ${0.1 + i * 0.07}s both` }}>
-                                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${color}55,transparent)` }} />
-                                <span style={{ position: "absolute", top: 14, right: 14, fontSize: 9, fontWeight: 800, color: "#f5c518", background: "rgba(245,197,24,0.1)", border: "1px solid rgba(245,197,24,0.2)", borderRadius: 99, padding: "2px 8px", letterSpacing: "0.06em" }}>SOON</span>
-                                <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, border: `1px solid ${color}30`, display: "flex", alignItems: "center", justifyContent: "center", color, marginBottom: 14 }}>{icon}</div>
-                                <h3 style={{ fontSize: 14, fontWeight: 800, color: "#e8f0d8", margin: "0 0 7px" }}>{title}</h3>
-                                <p style={{ fontSize: 12, color: "#4a6038", lineHeight: 1.65, margin: 0 }}>{desc}</p>
+            {/* Stats Overview */}
+            <section className="py-12 bg-zinc-900/20 border-y border-zinc-800/50 backdrop-blur-md">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12">
+                        {stats.map((stat, i) => (
+                            <div key={stat.label} className="flex items-center gap-5 group animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${i * 100}ms` }}>
+                                <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center border border-zinc-800/50 group-hover:border-zinc-700 transition-colors", stat.bg, stat.color)}>
+                                    {stat.icon}
+                                </div>
+                                <div className="space-y-0.5">
+                                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{stat.label}</p>
+                                    <p className="text-2xl font-black text-zinc-100">{stat.value}</p>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* SHOP */}
-            <div id="shop-section" style={{ borderTop: "1px solid rgba(134,187,60,0.1)" }}>
-                <Shop onOpenCreate={() => setCreateOpen(true)} />
+            {/* Features Preview */}
+            <section className="py-24 px-6 relative">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center space-y-4 mb-20">
+                        <Badge variant="outline" className="bg-yellow-500/10 border-yellow-500/20 text-yellow-500 px-4 py-1 rounded-full font-bold">
+                            ECOSYSTEM EXPANSION
+                        </Badge>
+                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">
+                            Advanced Suite <span className="text-zinc-600">Coming Soon</span>
+                        </h2>
+                        <p className="text-zinc-500 max-w-xl mx-auto">
+                            We're building the future of restaurant technology. Explore upcoming modules
+                            designed to push your business to new heights.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {features.map((feature, i) => (
+                            <Card key={feature.title} className={cn("bg-zinc-950 border-zinc-900 hover:border-zinc-800 transition-all duration-00 group overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700", feature.border)} style={{ animationDelay: `${i * 100}ms` }}>
+                                <CardContent className="p-8 space-y-6 relative">
+                                    <div className="absolute top-0 right-0 p-4">
+                                        <Badge className="bg-zinc-900 text-zinc-600 text-[8px] font-black border-zinc-800">BETA</Badge>
+                                    </div>
+                                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center ring-1 ring-white/5", feature.bg, feature.color)}>
+                                        {feature.icon}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="font-black text-zinc-100 group-hover:text-white transition-colors uppercase tracking-tight">{feature.title}</h3>
+                                        <p className="text-zinc-500 text-sm leading-relaxed">{feature.desc}</p>
+                                    </div>
+                                    <div className="pt-2">
+                                        <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
+                                            <div className={cn("h-full w-1/3 rounded-full opacity-50", feature.bg.replace('/10', '/100'))} />
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Shop Section */}
+            <div id="shop-section" className="border-t border-zinc-900 bg-zinc-950/30">
+                <Shop 
+                    title="My Restaurants"
+                    subtitle="Manage and oversee your personal culinary network."
+                    restaurants={restaurants}
+                    isLoading={isLoading}
+                    isError={isError}
+                    onOpenCreate={() => setCreateOpen(true)} 
+                />
             </div>
 
             <CreateRestaurantModal isOpen={createOpen} onClose={() => setCreateOpen(false)} />

@@ -1,62 +1,78 @@
 import { useState } from "react";
-import { UtensilsCrossed, MapPin, Phone, Search, Plus, Store, Filter, ChevronRight, Loader2, AlertCircle, Pencil } from "lucide-react";
-import { useFetchAllRestaurant } from "../../hooks/Restaurant/RestaurantHooks";
-import { CreateRestaurantModal } from "../modals/CreateRestaurantModal";
+import { useSelector } from "react-redux";
+import {ShoppingBag, Search, MapPin, Phone, UtensilsCrossed, Plus, Pencil, Trash2, ArrowRight, Loader2, Star, Clock, User as UserIcon } from "lucide-react";
+import { useDeleteRestaurant } from "../../hooks/Restaurant/RestaurantHooks";
 import { UpdateRestaurantModal } from "../modals/UpdateRestaurantModal";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "../ui/card";
+import { Badge } from "../ui/badge";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "../ui/select";
+import { cn } from "../../lib/utils";
+import type { RootState } from "../../store/store";
 
 interface Restaurant {
     id: string;
     name: string;
-    description?: string;
-    phone?: string;
-    foodType?: string;
-    nearestPlace?: string;
-    address?: { locality?: string; city?: string; state?: string; pincode?: string };
+    description: string;
+    phone: string;
+    foodType: "VEG" | "NON_VEG" | "BOTH";
+    nearestPlace: string;
+    userId: string;
+    user?: { name: string; email: string };
+    address: {
+        locality: string;
+        city: string;
+        state: string;
+        pincode: string;
+    };
 }
 
-interface ShopProps {
+interface Props {
+    title?: string;
+    subtitle?: string;
+    restaurants: Restaurant[];
+    isLoading: boolean;
+    isError: boolean;
     onOpenCreate?: () => void;
+    showAddButton?: boolean;
 }
 
 const foodTypeColors: Record<string, string> = {
-    veg: "#86bb3c",
-    non_veg: "#e74c3c",
-    both: "#f5c518",
-    italian: "#f5c518",
-    indian: "#ff6b35",
-    chinese: "#e74c3c",
-    "fast food": "#86bb3c",
-    mexican: "#9b59b6",
-    japanese: "#e91e63",
-    continental: "#3498db",
+    veg: "bg-green-500/10 text-green-500 border-green-500/20",
+    non_veg: "bg-red-500/10 text-red-500 border-red-500/20",
+    both: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
 };
 
-function getFoodTypeColor(type?: string): string {
-    if (!type) return "#86bb3c";
-    return foodTypeColors[type.toLowerCase()] ?? "#86bb3c";
-}
-
-function getInitials(name: string): string {
-    return name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-}
-
-export const Shop = ({ onOpenCreate }: ShopProps) => {
-    const { data, isLoading, isError } = useFetchAllRestaurant();
+export const Shop = ({ 
+    title = "Restaurant Directory", 
+    subtitle = "Manage and oversee your entire culinary network.",
+    restaurants = [], 
+    isLoading, 
+    isError, 
+    onOpenCreate,
+    showAddButton = true
+}: Props) => {
+    const user = useSelector((state: RootState) => state.auth.user);
+    const { mutate: deleteRest, isPending: isDeleting } = useDeleteRestaurant();
     const [search, setSearch] = useState("");
     const [filterType, setFilterType] = useState("All");
-    const [localCreateOpen, setLocalCreateOpen] = useState(false);
     const [updateTarget, setUpdateTarget] = useState<Restaurant | null>(null);
 
-    // Backend returns { message: '...', restaurants: [...] }
-    const restaurants: Restaurant[] = Array.isArray(data?.restaurants)
-        ? data.restaurants
-        : Array.isArray(data?.data)
-            ? data.data
-            : Array.isArray(data)
-                ? data
-                : [];
-
-    const foodTypes = ["All", ...Array.from(new Set(restaurants.map((r) => r.foodType).filter((t): t is string => Boolean(t))))];
+    const foodTypes = ["All", ...Array.from(new Set(restaurants.map((r) => r.foodType).filter((t): t is "VEG" | "NON_VEG" | "BOTH" => Boolean(t))))];
 
     const filtered = restaurants.filter((r) => {
         const matchSearch =
@@ -67,184 +83,182 @@ export const Shop = ({ onOpenCreate }: ShopProps) => {
         return matchSearch && matchFilter;
     });
 
-    const handleCreate = () => {
-        if (onOpenCreate) onOpenCreate();
-        else setLocalCreateOpen(true);
+    const handleDelete = (id: string) => {
+        if (window.confirm("Are you sure you want to delete this restaurant?")) {
+            deleteRest(id);
+        }
     };
 
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+                <Loader2 className="w-10 h-10 text-green-500 animate-spin" />
+                <p className="text-zinc-500 font-medium animate-pulse">Loading restaurants...</p>
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-center px-4 animate-in fade-in duration-500">
+                <div className="w-20 h-20 rounded-3xl bg-red-500/10 flex items-center justify-center text-red-500 mb-6 ring-1 ring-red-500/20">
+                    <ShoppingBag size={40} className="opacity-50" />
+                </div>
+                <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Oops! Something went wrong</h3>
+                <p className="text-zinc-500 max-w-sm mx-auto mb-8 font-medium leading-relaxed">
+                    We encountered an issue while loading the directory. Your session might have expired or there's a temporary connection problem.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button onClick={() => window.location.reload()} className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-8">
+                        Retry Loading
+                    </Button>
+                    {!user && (
+                        <Button onClick={() => window.location.href = "/login"} variant="outline" className="border-green-500/30 text-green-500 hover:bg-green-500/10 font-bold px-8">
+                            Go to Login
+                        </Button>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div style={{ paddingTop: 0, minHeight: "60vh", background: "#060d06" }}>
-            <style>{`
-                @keyframes fadeSlideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-                @keyframes spin{to{transform:rotate(360deg)}}
-                .r-card{transition:all 0.22s ease;cursor:pointer}
-                .r-card:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 0 1px rgba(134,187,60,0.25)!important;border-color:rgba(134,187,60,0.3)!important}
-                .r-card:hover .c-arrow{opacity:1!important;transform:translateX(3px)!important}
-                .r-chip{transition:all 0.18s;cursor:pointer;white-space:nowrap}
-                .r-chip:hover{border-color:rgba(134,187,60,0.5)!important;color:#86bb3c!important}
-                .s-input:focus{border-color:rgba(134,187,60,0.5)!important;background:rgba(134,187,60,0.06)!important}
-                .s-input::placeholder{color:#3a5028}
-                .s-addbtn{transition:all 0.22s ease}
-                .s-addbtn:hover{box-shadow:0 8px 32px rgba(134,187,60,0.5)!important;transform:translateY(-1px)}
-                .edit-btn{transition:all 0.18s;opacity:0}
-                .r-card:hover .edit-btn{opacity:1}
-                .edit-btn:hover{background:rgba(134,187,60,0.18)!important}
-            `}</style>
+        <div className="max-w-7xl mx-auto px-4 py-12 md:py-20">
+            {/* Header Controls */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+                <div className="space-y-1">
+                    <h2 className="text-3xl font-extrabold text-white tracking-tight">{title}</h2>
+                    <p className="text-zinc-500">{subtitle}</p>
+                </div>
 
-            {/* Section Header */}
-            <div style={{ background: "linear-gradient(135deg,rgba(10,22,10,0.98),rgba(5,12,5,0.95))", borderBottom: "1px solid rgba(134,187,60,0.12)", padding: "40px 24px 32px", position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: -50, right: 60, width: 260, height: 260, borderRadius: "50%", background: "radial-gradient(circle,rgba(134,187,60,0.06) 0%,transparent 70%)", pointerEvents: "none" }} />
-                <div style={{ maxWidth: 1200, margin: "0 auto", position: "relative" }}>
-                    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 18, marginBottom: 24 }}>
-                        <div>
-                            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(134,187,60,0.1)", border: "1px solid rgba(134,187,60,0.2)", borderRadius: 99, padding: "4px 12px", fontSize: 11, fontWeight: 700, color: "#86bb3c", letterSpacing: "0.06em", marginBottom: 12 }}>
-                                <Store size={11} /> RESTAURANT DIRECTORY
-                            </div>
-                            <h2 style={{ fontSize: "clamp(22px,4vw,36px)", fontWeight: 900, color: "#fff", letterSpacing: "-0.5px", margin: "0 0 6px", lineHeight: 1.1 }}>
-                                All{" "}
-                                <span style={{ background: "linear-gradient(90deg,#86bb3c,#f5c518)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                                    Restaurants
-                                </span>
-                            </h2>
-                            <p style={{ color: "#5a7048", fontSize: 13, margin: 0 }}>
-                                {isLoading ? "Loading…" : `${filtered.length} restaurant${filtered.length !== 1 ? "s" : ""} found`}
-                            </p>
-                        </div>
-                        <button className="s-addbtn" onClick={handleCreate} style={{ display: "flex", alignItems: "center", gap: 8, padding: "11px 20px", borderRadius: 11, border: "none", background: "linear-gradient(135deg,#86bb3c,#f5c518)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 20px rgba(134,187,60,0.35)", flexShrink: 0 }}>
-                            <Plus size={15} /> Add Restaurant
-                        </button>
+                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <div className="relative flex-1 md:w-64 min-w-[200px]">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" size={16} />
+                        <Input
+                            placeholder="Search name, city..."
+                            className="pl-10 bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/30"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
                     </div>
 
-                    {/* Search + filters */}
-                    <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-                        <div style={{ position: "relative", flex: "1 1 260px", minWidth: 200 }}>
-                            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "#4a6038", pointerEvents: "none" }} />
-                            <input className="s-input" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name, city…" style={{ width: "100%", paddingLeft: 34, paddingRight: 12, paddingTop: 9, paddingBottom: 9, borderRadius: 10, border: "1px solid rgba(134,187,60,0.18)", background: "rgba(255,255,255,0.04)", color: "#e8f0d8", fontSize: 13, outline: "none", transition: "all 0.2s", boxSizing: "border-box" }} />
-                        </div>
-                        <div style={{ display: "flex", gap: 7, alignItems: "center", flexWrap: "wrap" }}>
-                            <Filter size={12} color="#4a6038" style={{ flexShrink: 0 }} />
-                            {foodTypes.map((type) => (
-                                <button key={type} className="r-chip" onClick={() => setFilterType(type)} style={{ padding: "5px 13px", borderRadius: 99, border: `1px solid ${filterType === type ? "rgba(134,187,60,0.5)" : "rgba(134,187,60,0.15)"}`, background: filterType === type ? "rgba(134,187,60,0.15)" : "rgba(255,255,255,0.03)", color: filterType === type ? "#86bb3c" : "#5a7048", fontSize: 11, fontWeight: 700, letterSpacing: "0.04em" }}>
-                                    {type}
-                                </button>
+                    <Select value={filterType} onValueChange={setFilterType}>
+                        <SelectTrigger className="w-32 bg-zinc-900/50 border-zinc-800 text-zinc-300">
+                            <SelectValue placeholder="Type" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
+                            {foodTypes.map(t => (
+                                <SelectItem key={t} value={t}>{t}</SelectItem>
                             ))}
-                        </div>
-                    </div>
+                        </SelectContent>
+                    </Select>
+
+                    {showAddButton && onOpenCreate && (
+                        <Button
+                            onClick={onOpenCreate}
+                            className="bg-green-600 hover:bg-green-500 text-white font-bold"
+                        >
+                            <Plus size={18} className="mr-2" /> New
+                        </Button>
+                    )}
                 </div>
             </div>
 
-            {/* Content */}
-            <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 24px 60px" }}>
-                {/* Loading */}
-                {isLoading && (
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "72px 0", gap: 14 }}>
-                        <Loader2 style={{ width: 34, height: 34, color: "#86bb3c", animation: "spin 0.9s linear infinite" }} />
-                        <p style={{ color: "#4a6038", fontSize: 13, margin: 0 }}>Loading restaurants…</p>
-                    </div>
-                )}
-
-                {/* Error */}
-                {isError && (
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "72px 0", gap: 12 }}>
-                        <div style={{ width: 54, height: 54, borderRadius: "50%", background: "rgba(248,113,113,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <AlertCircle size={24} color="#f87171" />
-                        </div>
-                        <p style={{ color: "#f87171", fontSize: 14, fontWeight: 600, margin: 0 }}>Failed to load restaurants</p>
-                        <p style={{ color: "#4a3030", fontSize: 12, margin: 0 }}>Check your connection and try again.</p>
-                    </div>
-                )}
-
-                {/* Empty */}
-                {!isLoading && !isError && filtered.length === 0 && (
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "72px 0", gap: 14 }}>
-                        <div style={{ width: 68, height: 68, borderRadius: 18, background: "rgba(134,187,60,0.07)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <UtensilsCrossed size={30} color="#3a5028" />
-                        </div>
-                        <h3 style={{ color: "#5a7048", fontSize: 17, fontWeight: 700, margin: 0 }}>{search ? "No results found" : "No restaurants yet"}</h3>
-                        <p style={{ color: "#3a5028", fontSize: 13, margin: 0, textAlign: "center" }}>{search ? "Try a different search term." : "Be the first to add a restaurant!"}</p>
-                        {!search && (
-                            <button onClick={handleCreate} style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#86bb3c,#f5c518)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-                                <Plus size={14} /> Add Restaurant
-                            </button>
-                        )}
-                    </div>
-                )}
-
-                {/* Grid */}
-                {!isLoading && !isError && filtered.length > 0 && (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(310px,1fr))", gap: 18 }}>
-                        {filtered.map((r, i) => {
-                            const color = getFoodTypeColor(r.foodType);
-                            return (
-                                <div key={r.id} className="r-card" style={{ background: "rgba(8,18,8,0.8)", border: "1px solid rgba(134,187,60,0.1)", borderRadius: 16, overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.4)", animation: `fadeSlideUp 0.3s ease ${i * 0.04}s both`, position: "relative" }}>
-                                    <div style={{ height: 4, background: `linear-gradient(90deg,${color},#f5c518)` }} />
-                                    <div style={{ padding: "18px 20px" }}>
-                                        {/* Header */}
-                                        <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
-                                            <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}22`, border: `1px solid ${color}40`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 14, fontWeight: 800, color, letterSpacing: "-0.5px" }}>
-                                                {getInitials(r.name)}
+            {/* Grid */}
+            {filtered.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-500">
+                    {filtered.map((r) => {
+                        const isOwner = user?.id === r.userId;
+                        return (
+                            <Card key={r.id} className="group bg-zinc-900/30 border-zinc-800 hover:border-green-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/5 relative overflow-hidden">
+                                <CardHeader className="p-5 pb-3">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <Badge className={cn("capitalize font-bold border", foodTypeColors[r.foodType?.toLowerCase()] || "bg-zinc-800 text-zinc-400")}>
+                                            {r.foodType}
+                                        </Badge>
+                                        
+                                        {isOwner && (
+                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 text-zinc-500 hover:text-yellow-500 hover:bg-yellow-500/10"
+                                                    onClick={() => setUpdateTarget(r)}
+                                                >
+                                                    <Pencil size={14} />
+                                                </Button>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 text-zinc-500 hover:text-red-500 hover:bg-red-500/10"
+                                                    onClick={() => handleDelete(r.id)}
+                                                    disabled={isDeleting}
+                                                >
+                                                    <Trash2 size={14} />
+                                                </Button>
                                             </div>
-                                            <div style={{ flex: 1, minWidth: 0 }}>
-                                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
-                                                    <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: "#e8f0d8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.name}</h3>
-                                                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                                                        <button
-                                                            className="edit-btn"
-                                                            onClick={(e) => { e.stopPropagation(); setUpdateTarget(r); }}
-                                                            style={{ width: 28, height: 28, borderRadius: 8, border: "1px solid rgba(134,187,60,0.2)", background: "rgba(134,187,60,0.08)", color: "#86bb3c", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-                                                        >
-                                                            <Pencil size={12} />
-                                                        </button>
-                                                        <ChevronRight className="c-arrow" size={14} color="#86bb3c" style={{ opacity: 0, transition: "all 0.2s" }} />
-                                                    </div>
-                                                </div>
-                                                {r.foodType && (
-                                                    <span style={{ display: "inline-block", marginTop: 4, padding: "2px 9px", borderRadius: 99, background: `${color}16`, border: `1px solid ${color}30`, fontSize: 10, fontWeight: 700, color, letterSpacing: "0.05em", textTransform: "capitalize" }}>
-                                                        {r.foodType}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {r.description && (
-                                            <p style={{ fontSize: 12, color: "#4a6038", lineHeight: 1.6, margin: "0 0 12px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                                                {r.description}
-                                            </p>
                                         )}
+                                    </div>
+                                    <CardTitle className="text-lg font-bold text-white group-hover:text-green-500 transition-colors line-clamp-1">{r.name}</CardTitle>
+                                    <CardDescription className="text-zinc-500 text-xs line-clamp-2 min-h-[32px]">{r.description || "No description provided."}</CardDescription>
+                                </CardHeader>
 
-                                        <div style={{ height: 1, background: "rgba(134,187,60,0.07)", margin: "12px 0" }} />
+                                <CardContent className="p-5 pt-0 space-y-3">
+                                    <div className="flex items-start gap-2.5 text-zinc-400 text-sm">
+                                        <MapPin size={15} className="mt-0.5 text-green-500/70 shrink-0" />
+                                        <span className="line-clamp-2 leading-tight">
+                                            {r.address?.locality}, {r.address?.city}, {r.address?.state} {r.address?.pincode}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2.5 text-zinc-400 text-sm">
+                                        <Phone size={15} className="text-green-500/70 shrink-0" />
+                                        <span>{r.phone}</span>
+                                    </div>
+                                    
+                                    {!isOwner && r.user && (
+                                        <div className="flex items-center gap-2.5 text-zinc-500 text-[10px] font-bold uppercase tracking-widest pt-2 border-t border-zinc-800/30">
+                                            <UserIcon size={12} className="text-zinc-600" />
+                                            <span>Owner: {r.user.name}</span>
+                                        </div>
+                                    )}
+                                </CardContent>
 
-                                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                            {(r.address?.city || r.address?.state) && (
-                                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                                    <MapPin size={11} color="#4a6038" style={{ flexShrink: 0 }} />
-                                                    <span style={{ fontSize: 11, color: "#5a7048" }}>{[r.address?.locality, r.address?.city, r.address?.state].filter(Boolean).join(", ")}</span>
-                                                </div>
-                                            )}
-                                            {r.phone && (
-                                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                                    <Phone size={11} color="#4a6038" style={{ flexShrink: 0 }} />
-                                                    <span style={{ fontSize: 11, color: "#5a7048" }}>{r.phone}</span>
-                                                </div>
-                                            )}
-                                            {r.nearestPlace && (
-                                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                                    <UtensilsCrossed size={11} color="#4a6038" style={{ flexShrink: 0 }} />
-                                                    <span style={{ fontSize: 11, color: "#5a7048" }}>Near {r.nearestPlace}</span>
-                                                </div>
-                                            )}
+                                <CardFooter className="p-5 pt-2 border-t border-zinc-800/50 flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-600 uppercase tracking-tighter">
+                                            <Clock size={12} /> Live
+                                        </div>
+                                        <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-600 uppercase tracking-tighter">
+                                            <Star size={12} className="text-yellow-500/50" /> 4.8
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                    <Button variant="link" className="h-auto p-0 text-green-500 hover:text-green-400 text-xs font-bold group">
+                                        View Details <ArrowRight size={12} className="ml-1 group-hover:translate-x-1 transition-transform" />
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="flex flex-col items-center justify-center py-20 bg-zinc-900/10 rounded-3xl border border-dashed border-zinc-800">
+                    <div className="w-16 h-16 rounded-full bg-zinc-800/50 flex items-center justify-center text-zinc-700 mb-4">
+                        <UtensilsCrossed size={32} />
                     </div>
-                )}
-            </div>
+                    <h3 className="text-lg font-bold text-zinc-400">No restaurants found</h3>
+                    <p className="text-zinc-600 text-sm mb-6">Try adjusting your search or add a new restaurant.</p>
+                    {showAddButton && onOpenCreate && (
+                        <Button onClick={onOpenCreate} variant="outline" className="border-zinc-800 text-zinc-500 hover:text-zinc-300">
+                            Add First Restaurant
+                        </Button>
+                    )}
+                </div>
+            )}
 
-            {/* Local modal (when not using parent's) */}
-            {!onOpenCreate && <CreateRestaurantModal isOpen={localCreateOpen} onClose={() => setLocalCreateOpen(false)} />}
-            <UpdateRestaurantModal restaurant={updateTarget} onClose={() => setUpdateTarget(null)} />
+            <UpdateRestaurantModal
+                restaurant={updateTarget}
+                onClose={() => setUpdateTarget(null)}
+            />
         </div>
     );
 };

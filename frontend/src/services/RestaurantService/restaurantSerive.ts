@@ -49,3 +49,8 @@ export const fetchAllRestaurant = async () => {
     const response = await AxiosInstance.get('/restaurant/get-restaurant');
     return response.data;
 }
+
+export const fetchMyRestaurants = async () => {
+    const response = await AxiosInstance.get('/restaurant/get-my-restaurant');
+    return response.data;
+}

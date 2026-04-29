@@ -17,6 +17,8 @@ import { IJwtService } from "../services/jwt/IJwtServices";
 import { JwtService } from "../services/jwt/JwtServices";
 import { IRefreshTokenService } from "../services/refreshToken/IRefreshTokenService";
 import { RefreshTokenService } from "../services/refreshToken/RefreshTokenService";
+import { ICloudinaryService } from "../services/cloudinary/ICloudinaryService";
+import { CloudinaryService } from "../services/cloudinary/CloudinaryService";
 
 export class ServiceModule {
     static registerModules(): void {
@@ -52,6 +54,10 @@ export class ServiceModule {
 
         container.register<IRefreshTokenService>("IRefreshTokenService", {
             useClass: RefreshTokenService
+        });
+
+        container.register<ICloudinaryService>("ICloudinaryService", {
+            useClass: CloudinaryService
         });
     }
 }

@@ -6,6 +6,8 @@ export interface IRestaurantRepository {
     create(data:CreateRestaurantDTO): Promise<Restaurant>;
 
     findAll(): Promise<Restaurant[]>;
+    
+    findByUserId(userId: string): Promise<Restaurant[]>;
 
     findById(id: string): Promise<Restaurant | null>;
 

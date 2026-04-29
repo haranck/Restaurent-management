@@ -28,7 +28,7 @@ AxiosInstance.interceptors.response.use((response) => response, async (error) =>
                 { withCredentials: true }
             );
             if(response.status === 200) {
-                const {accessToken} = response.data.data
+                const {accessToken} = response.data
                 store.dispatch(setAccessToken(accessToken));
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
                 return AxiosInstance(originalRequest);

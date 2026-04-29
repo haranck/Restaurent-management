@@ -12,4 +12,8 @@ export class FetchRestaurantService implements IFetchRestaurantService {
     async fetchAll(): Promise<Restaurant[]> {
         return this.restaurantRepo.findAll();
     }
+
+    async fetchByUser(userId: string): Promise<Restaurant[]> {
+        return this.restaurantRepo.findByUserId(userId);
+    }
 }

@@ -31,8 +31,8 @@ export class UserController {
 
             res.cookie("refreshToken", response.refreshToken, {
                 httpOnly: true,
-                secure: true,
-                sameSite: "strict",
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
@@ -52,8 +52,8 @@ export class UserController {
             const response = await this.refreshTokenService.refreshToken(refreshToken);
             res.cookie("refreshToken", response.refreshToken, {
                 httpOnly: true,
-                secure: true,
-                sameSite: "strict",
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
@@ -61,7 +61,7 @@ export class UserController {
 
 
         } catch (error: any) {
-            res.status(500).json({ message: "Failed to refresh token", error: error.message });
+            res.status(401).json({ message: "Failed to refresh token", error: error.message });
         }
     }
 

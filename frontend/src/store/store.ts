@@ -1,6 +1,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slice/authSlice";
 import tokenReducer from "./slice/tokenSlice";
+import restaurantReducer from "./slice/restaurantSlice";
 
 import {
   persistStore,
@@ -30,12 +31,13 @@ const customStorage = {
 const persistConfig = {
     key: "root",
     storage: customStorage,
-    whitelist: ["auth", "token"],
+    whitelist: ["auth", "token", "restaurant"],
 };
 
 const rootReducer = combineReducers({
     auth: authReducer,
     token: tokenReducer,
+    restaurant: restaurantReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -1,11 +1,13 @@
 import { Router } from "express";
-import { restaurantController } from "../DI/resolver";
+import { restaurantController, authMiddleware } from "../DI/resolver";
+import { upload } from "../middleware/uploadMiddleware";
 
 const router = Router();
 
-router.post("/create", restaurantController.create);
+router.post("/create", authMiddleware.authenticate, upload.single("image"), restaurantController.create);
 router.get("/get-restaurant", restaurantController.fetchAll);
-router.put("/update/:id", restaurantController.update);
-router.delete("/delete/:id", restaurantController.delete);
+router.get("/get-my-restaurant", authMiddleware.authenticate, restaurantController.fetchMine);
+router.put("/update/:id", authMiddleware.authenticate, upload.single("image"), restaurantController.update);
+router.delete("/delete/:id", authMiddleware.authenticate, restaurantController.delete);
 
 export default router;
