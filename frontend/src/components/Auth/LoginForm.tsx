@@ -112,7 +112,7 @@ const LoginForm = ({ onSwitchToSignUp, onSubmit, isLoading }: LoginFormProps) =>
 
       {/* Form */}
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={(e) => handleSubmit(onSubmit)(e)}
         style={{ display: "flex", flexDirection: "column", gap: "12px" }}
       >
         {/* Email */}

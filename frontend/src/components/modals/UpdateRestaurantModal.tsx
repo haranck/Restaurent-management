@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { UtensilsCrossed, MapPin, Phone, Tag, Loader2, CheckCircle2, Pencil, Info } from "lucide-react";
+import { UtensilsCrossed, MapPin, Phone, Tag, Loader2, CheckCircle2, Pencil, Info, ImagePlus, X } from "lucide-react";
 import { useUpdateRestaurant } from "../../hooks/Restaurant/RestaurantHooks";
 import {
     Dialog,
@@ -32,6 +32,8 @@ interface Restaurant {
     phone?: string;
     foodType?: "VEG" | "NON_VEG" | "BOTH";
     nearestPlace?: string;
+    imageUrl?: string | null;
+    imageId?: string | null;
     address?: { locality?: string; city?: string; state?: string; pincode?: string };
 }
 
@@ -56,6 +58,9 @@ type UpdateFormData = z.infer<typeof updateSchema>;
 
 export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
     const { mutate, isPending, isSuccess, reset: resetMutation } = useUpdateRestaurant();
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const {
         register,
@@ -63,29 +68,50 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
         reset: resetForm,
         setValue,
         formState: { errors },
-    } = useForm<UpdateFormData>({
-        resolver: zodResolver(updateSchema),
-    });
+    } = useForm<UpdateFormData>({ resolver: zodResolver(updateSchema) });
 
-    useEffect(() => {
-        if (restaurant) {
-            resetForm({
-                name: restaurant.name,
-                description: restaurant.description || "",
-                phone: restaurant.phone,
-                foodType: restaurant.foodType as "VEG" | "NON_VEG" | "BOTH",
-                nearestPlace: restaurant.nearestPlace || "",
-                locality: restaurant.address?.locality,
-                city: restaurant.address?.city,
-                state: restaurant.address?.state,
-                pincode: restaurant.address?.pincode,
-            });
+    const [prevRestaurantId, setPrevRestaurantId] = useState<string | null>(null);
+
+    // Adjust state during render when the restaurant changes to avoid cascading renders
+    if (restaurant && restaurant.id !== prevRestaurantId) {
+        setPrevRestaurantId(restaurant.id);
+        setImageFile(null);
+        setImagePreview(null);
+        resetForm({
+            name: restaurant.name,
+            description: restaurant.description || "",
+            phone: restaurant.phone,
+            foodType: restaurant.foodType,
+            nearestPlace: restaurant.nearestPlace || "",
+            locality: restaurant.address?.locality,
+            city: restaurant.address?.city,
+            state: restaurant.address?.state,
+            pincode: restaurant.address?.pincode,
+        });
+    }
+
+    const handleImageChange = (file: File | null) => {
+        if (!file) return;
+        if (!file.type.startsWith("image/")) {
+            toast.error("Only image files are allowed.");
+            return;
         }
-    }, [restaurant, resetForm]);
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Image must be smaller than 5MB.");
+            return;
+        }
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+    };
+
+    const removeImage = () => {
+        setImageFile(null);
+        setImagePreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
 
     const onSubmit = (data: UpdateFormData) => {
         if (!restaurant) return;
-
         const payload = {
             id: restaurant.id,
             name: data.name,
@@ -93,21 +119,21 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
             phone: data.phone,
             foodType: data.foodType,
             nearestPlace: data.nearestPlace,
+            image: imageFile ?? undefined,
             address: (data.city || data.state || data.locality || data.pincode)
                 ? {
                     locality: data.locality || "",
                     city: data.city || "",
                     state: data.state || "",
-                    pincode: data.pincode || ""
+                    pincode: data.pincode || "",
                 }
                 : undefined,
         };
 
         mutate(payload, {
             onSuccess: () => {
-                setTimeout(() => {
-                    handleClose();
-                }, 1500);
+                toast.success("Restaurant updated successfully!");
+                setTimeout(() => handleClose(), 1500);
             },
             onError: (error: unknown) => {
                 if (error instanceof Error) {
@@ -115,20 +141,24 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                 } else {
                     toast.error("An unknown error occurred");
                 }
-            }
+            },
         });
     };
 
     const handleClose = () => {
         resetMutation();
+        removeImage();
         onClose();
     };
 
+    // Decide which image to show: new preview > existing cloudinary url
+    const displayImage = imagePreview ?? restaurant?.imageUrl ?? null;
+
     return (
         <Dialog open={!!restaurant} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent className="sm:max-w-[600px] bg-zinc-950 border-zinc-800 text-zinc-100 overflow-y-auto max-h-[90vh]">
+            <DialogContent className="sm:max-w-[620px] bg-zinc-950 border-zinc-800 text-zinc-100 overflow-y-auto max-h-[90vh]">
                 <DialogHeader className="flex flex-row items-center gap-4 space-y-0 pb-6 border-b border-zinc-800">
-                    <div className="w-12 h-12 rounded-xl bg-linear-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg shadow-yellow-500/20">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg shadow-yellow-500/20">
                         <Pencil className="text-white" size={20} />
                     </div>
                     <div className="flex-1 text-left">
@@ -150,8 +180,8 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                         </div>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pt-6">
-                        {/* Basic Info */}
+                    <form onSubmit={(e) => handleSubmit(onSubmit)(e)} className="space-y-8 pt-6">
+                        {/* Basic Details */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 text-green-500 text-xs font-bold uppercase tracking-widest pb-2 border-b border-zinc-800/50">
                                 <UtensilsCrossed size={14} />
@@ -171,10 +201,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="foodType" className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Food Type</Label>
-                                    <Select
-                                        onValueChange={(value) => setValue("foodType", value as "VEG" | "NON_VEG" | "BOTH")}
-                                        value={restaurant?.foodType}
-                                    >
+                                    <Select onValueChange={(value) => setValue("foodType", value as "VEG" | "NON_VEG" | "BOTH")} value={restaurant?.foodType}>
                                         <SelectTrigger className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus:ring-yellow-500/50">
                                             <SelectValue placeholder="Select type" />
                                         </SelectTrigger>
@@ -192,7 +219,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                 <Textarea
                                     id="description"
                                     placeholder="Brief description..."
-                                    className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-yellow-500/50 min-h-[80px]"
+                                    className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-yellow-500/50 min-h-[70px]"
                                     {...register("description")}
                                 />
                             </div>
@@ -218,6 +245,77 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                     />
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Image Upload */}
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-blue-400 text-xs font-bold uppercase tracking-widest pb-2 border-b border-zinc-800/50">
+                                <ImagePlus size={14} />
+                                <span>Restaurant Image <span className="text-zinc-600 normal-case font-normal">(upload new to replace current)</span></span>
+                            </div>
+
+                            {displayImage ? (
+                                <div className="relative rounded-xl overflow-hidden border border-zinc-700 group">
+                                    <img
+                                        src={displayImage}
+                                        alt="Restaurant"
+                                        className="w-full h-44 object-cover"
+                                    />
+                                    {/* Badge to show if it's existing or new */}
+                                    <div className="absolute top-2 left-2">
+                                        <span className={cn(
+                                            "text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider",
+                                            imagePreview
+                                                ? "bg-green-500/80 text-white"
+                                                : "bg-zinc-800/80 text-zinc-400"
+                                        )}>
+                                            {imagePreview ? "New Image" : "Current Image"}
+                                        </span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold gap-1.5"
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            <ImagePlus size={14} /> Replace
+                                        </Button>
+                                        {imagePreview && (
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="sm"
+                                                className="gap-1.5 font-bold"
+                                                onClick={removeImage}
+                                            >
+                                                <X size={14} /> Remove New
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="w-full h-36 rounded-xl border-2 border-dashed border-zinc-700 hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all flex flex-col items-center justify-center gap-3 group cursor-pointer"
+                                >
+                                    <div className="w-12 h-12 rounded-xl bg-zinc-800 group-hover:bg-yellow-500/10 flex items-center justify-center transition-colors">
+                                        <ImagePlus size={22} className="text-zinc-500 group-hover:text-yellow-500 transition-colors" />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm font-semibold text-zinc-400 group-hover:text-zinc-300">Click to upload image</p>
+                                        <p className="text-xs text-zinc-600">PNG, JPG, WEBP up to 5MB</p>
+                                    </div>
+                                </button>
+                            )}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
+                            />
                         </div>
 
                         {/* Address */}
@@ -271,29 +369,18 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                         </div>
 
                         <div className="flex gap-3 justify-end pt-4 border-t border-zinc-800">
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={handleClose}
-                                className="text-zinc-400 hover:text-white hover:bg-zinc-900"
-                            >
+                            <Button type="button" variant="ghost" onClick={handleClose} className="text-zinc-400 hover:text-white hover:bg-zinc-900">
                                 Cancel
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isPending}
-                                className="bg-linear-to-br from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-white font-bold px-8 shadow-lg shadow-yellow-600/20"
+                                className="bg-gradient-to-br from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-white font-bold px-8 shadow-lg shadow-yellow-600/20"
                             >
                                 {isPending ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Saving...
-                                    </>
+                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
                                 ) : (
-                                    <>
-                                        <Pencil className="mr-2 h-4 w-4" />
-                                        Save Changes
-                                    </>
+                                    <><Pencil className="mr-2 h-4 w-4" /> Save Changes</>
                                 )}
                             </Button>
                         </div>

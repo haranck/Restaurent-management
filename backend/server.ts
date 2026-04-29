@@ -9,7 +9,7 @@ import userRoutes from "./src/routes/user.routes";
 import restaurantRoutes from "./src/routes/restaurant.routes";
 
 
-const app = express();
+const app = express(); 
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
@@ -18,6 +18,7 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/api/auth",userRoutes);

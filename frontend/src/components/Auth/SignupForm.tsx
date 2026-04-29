@@ -127,7 +127,7 @@ const SignupForm = ({ onSwitchToSignIn, onSubmit, isLoading }: SignupFormProps) 
       />
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <form onSubmit={(e) => handleSubmit(onSubmit)(e)} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         {fields.map((f) => (
           <div key={f.name}>
             <input

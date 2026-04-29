@@ -57,7 +57,10 @@ export class RestaurantRepository implements IRestaurantRepository {
       data: {
         ...rest,
         address: address ? {
-          update: address
+          upsert: {
+            create: address,
+            update: address,
+          }
         } : undefined
       },
       include: { address: true }

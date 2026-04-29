@@ -1,7 +1,8 @@
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { UtensilsCrossed, MapPin, Phone, Tag, Loader2, CheckCircle2, Info } from "lucide-react";
+import { UtensilsCrossed, MapPin, Phone, Tag, Loader2, CheckCircle2, Info, ImagePlus, X } from "lucide-react";
 import { useCreateRestaurant } from "../../hooks/Restaurant/RestaurantHooks";
 import {
     Dialog,
@@ -47,6 +48,9 @@ type RestaurantFormData = z.infer<typeof restaurantSchema>;
 
 export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
     const { mutate, isPending, isSuccess, reset: resetMutation } = useCreateRestaurant();
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const {
         register,
@@ -56,18 +60,37 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
         formState: { errors },
     } = useForm<RestaurantFormData>({
         resolver: zodResolver(restaurantSchema),
-        defaultValues: {
-            foodType: "VEG",
-        },
+        defaultValues: { foodType: "VEG" },
     });
+
+    const handleImageChange = (file: File | null) => {
+        if (!file) return;
+        if (!file.type.startsWith("image/")) {
+            toast.error("Only image files are allowed.");
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Image must be smaller than 5MB.");
+            return;
+        }
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+    };
+
+    const removeImage = () => {
+        setImageFile(null);
+        setImagePreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
 
     const onSubmit = (data: RestaurantFormData) => {
         const payload = {
             name: data.name,
-            description: data.description || "",
+            description: data.description,
             phone: data.phone,
             foodType: data.foodType,
-            nearestPlace: data.nearestPlace || "",
+            nearestPlace: data.nearestPlace,
+            image: imageFile ?? undefined,
             address: {
                 locality: data.locality,
                 city: data.city,
@@ -78,31 +101,34 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
 
         mutate(payload, {
             onSuccess: () => {
-                setTimeout(() => {
-                    handleClose();
-                }, 1500);
+                toast.success("Restaurant created successfully!");
+                setTimeout(() => handleClose(), 1500);
             },
-            onError: (error: unknown) => {
-                if (error instanceof Error) {
+            onError: (error: any) => {
+                console.error("Create Restaurant Error:", error?.response?.data || error);
+                if (error?.response?.data?.message) {
+                    toast.error(error.response.data.message);
+                } else if (error instanceof Error) {
                     toast.error(error.message);
                 } else {
                     toast.error("An unknown error occurred");
                 }
-            }
+            },
         });
     };
 
     const handleClose = () => {
         resetForm();
         resetMutation();
+        removeImage();
         onClose();
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent className="sm:max-w-[600px] bg-zinc-950 border-zinc-800 text-zinc-100 overflow-y-auto max-h-[90vh]">
+            <DialogContent className="sm:max-w-[620px] bg-zinc-950 border-zinc-800 text-zinc-100 overflow-y-auto max-h-[90vh]">
                 <DialogHeader className="flex flex-row items-center gap-4 space-y-0 pb-6 border-b border-zinc-800">
-                    <div className="w-12 h-12 rounded-xl bg-linear-to-br from-green-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-green-500/20">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-green-500/20">
                         <UtensilsCrossed className="text-white" size={24} />
                     </div>
                     <div className="flex-1 text-left">
@@ -124,7 +150,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                         </div>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pt-6">
+                    <form onSubmit={(e) => handleSubmit(onSubmit)(e)} className="space-y-8 pt-6">
                         {/* Basic Info */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 text-yellow-500 text-xs font-bold uppercase tracking-widest pb-2 border-b border-zinc-800/50">
@@ -145,10 +171,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="foodType" className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Food Type *</Label>
-                                    <Select
-                                        onValueChange={(value) => setValue("foodType", value as "VEG" | "NON_VEG" | "BOTH")}
-                                        defaultValue="VEG"
-                                    >
+                                    <Select onValueChange={(value) => setValue("foodType", value as "VEG" | "NON_VEG" | "BOTH")} defaultValue="VEG">
                                         <SelectTrigger className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus:ring-green-500/50">
                                             <SelectValue placeholder="Select type" />
                                         </SelectTrigger>
@@ -166,7 +189,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                 <Textarea
                                     id="description"
                                     placeholder="Brief description of your restaurant..."
-                                    className="bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/50 min-h-[80px]"
+                                    className="bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/50 min-h-[70px]"
                                     {...register("description")}
                                 />
                             </div>
@@ -192,6 +215,56 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                     />
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Image Upload */}
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-blue-400 text-xs font-bold uppercase tracking-widest pb-2 border-b border-zinc-800/50">
+                                <ImagePlus size={14} />
+                                <span>Restaurant Image <span className="text-zinc-600 normal-case font-normal">(optional, max 5MB)</span></span>
+                            </div>
+
+                            {imagePreview ? (
+                                <div className="relative rounded-xl overflow-hidden border border-zinc-700 group">
+                                    <img
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        className="w-full h-44 object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="sm"
+                                            className="gap-1.5 font-bold"
+                                            onClick={removeImage}
+                                        >
+                                            <X size={14} /> Remove Image
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="w-full h-36 rounded-xl border-2 border-dashed border-zinc-700 hover:border-green-500/50 hover:bg-green-500/5 transition-all flex flex-col items-center justify-center gap-3 group cursor-pointer"
+                                >
+                                    <div className="w-12 h-12 rounded-xl bg-zinc-800 group-hover:bg-green-500/10 flex items-center justify-center transition-colors">
+                                        <ImagePlus size={22} className="text-zinc-500 group-hover:text-green-500 transition-colors" />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm font-semibold text-zinc-400 group-hover:text-zinc-300">Click to upload image</p>
+                                        <p className="text-xs text-zinc-600">PNG, JPG, WEBP up to 5MB</p>
+                                    </div>
+                                </button>
+                            )}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
+                            />
                         </div>
 
                         {/* Address */}
@@ -245,29 +318,18 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                         </div>
 
                         <div className="flex gap-3 justify-end pt-4 border-t border-zinc-800">
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={handleClose}
-                                className="text-zinc-400 hover:text-white hover:bg-zinc-900"
-                            >
+                            <Button type="button" variant="ghost" onClick={handleClose} className="text-zinc-400 hover:text-white hover:bg-zinc-900">
                                 Cancel
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isPending}
-                                className="bg-linear-to-br from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold px-8 shadow-lg shadow-green-600/20"
+                                className="bg-gradient-to-br from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold px-8 shadow-lg shadow-green-600/20"
                             >
                                 {isPending ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Creating...
-                                    </>
+                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...</>
                                 ) : (
-                                    <>
-                                        <UtensilsCrossed className="mr-2 h-4 w-4" />
-                                        Add Restaurant
-                                    </>
+                                    <><UtensilsCrossed className="mr-2 h-4 w-4" /> Add Restaurant</>
                                 )}
                             </Button>
                         </div>
