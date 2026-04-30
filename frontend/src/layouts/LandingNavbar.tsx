@@ -10,8 +10,8 @@ const LandingNavbar = () => {
                 <div className="w-9 h-9 rounded-xl bg-linear-to-br from-green-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-green-500/20 group-hover:scale-110 transition-transform duration-300">
                     <UtensilsCrossed className="text-white w-[18px] h-[18px]" strokeWidth={2.5} />
                 </div>
-                <span className="text-lg font-black tracking-tighter bg-linear-to-br from-green-500 to-yellow-500 bg-clip-text text-transparent">
-                    DineManager
+                <span style={{ fontSize: "20px", fontWeight: 900, color: "#fff", letterSpacing: "-0.5px" }}>
+                    DineMap
                 </span>
             </Link>
 

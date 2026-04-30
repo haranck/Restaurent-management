@@ -136,7 +136,10 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                 setTimeout(() => handleClose(), 1500);
             },
             onError: (error: unknown) => {
-                if (error instanceof Error) {
+                const err = error as { response?: { data?: { message?: string } } };
+                if (err?.response?.data?.message) {
+                    toast.error(err.response.data.message);
+                } else if (error instanceof Error) {
                     toast.error(error.message);
                 } else {
                     toast.error("An unknown error occurred");
@@ -156,15 +159,22 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
 
     return (
         <Dialog open={!!restaurant} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent className="sm:max-w-[620px] bg-zinc-950 border-zinc-800 text-zinc-100 overflow-y-auto max-h-[90vh]">
-                <DialogHeader className="flex flex-row items-center gap-4 space-y-0 pb-6 border-b border-zinc-800">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg shadow-yellow-500/20">
-                        <Pencil className="text-white" size={20} />
+            <DialogContent className="w-[95vw] sm:w-full mt-10 sm:max-w-[650px] bg-zinc-950/80 backdrop-blur-3xl border-zinc-800/50 shadow-[0_0_100px_rgba(234,179,8,0.15)] text-zinc-100 overflow-x-hidden overflow-y-auto max-h-[90vh] p-0">
+                <div className="absolute -top-40 -left-40 w-80 h-80 bg-yellow-500/10 blur-[100px] pointer-events-none rounded-full" />
+                <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-orange-500/10 blur-[100px] pointer-events-none rounded-full" />
+                
+                <div className="p-5 sm:p-8 relative z-10">
+                <DialogHeader className="flex flex-row items-center gap-5 space-y-0 pb-6 border-b border-zinc-800/50">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-yellow-500/20 blur-xl rounded-full" />
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg ring-1 ring-white/20 relative z-10">
+                            <Pencil className="text-black" size={24} strokeWidth={2.5} />
+                        </div>
                     </div>
                     <div className="flex-1 text-left">
-                        <DialogTitle className="text-xl font-bold tracking-tight">Edit Restaurant</DialogTitle>
-                        <DialogDescription className="text-zinc-500 text-sm">
-                            Updating: <span className="text-yellow-500 font-semibold">{restaurant?.name}</span>
+                        <DialogTitle className="text-2xl font-black tracking-tight text-white">Edit Restaurant</DialogTitle>
+                        <DialogDescription className="text-zinc-400 text-sm font-medium mt-1">
+                            Updating: <span className="text-yellow-500 font-bold">{restaurant?.name}</span>
                         </DialogDescription>
                     </div>
                 </DialogHeader>
@@ -194,7 +204,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                     <Input
                                         id="name"
                                         placeholder="Restaurant name"
-                                        className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-yellow-500/50", errors.name && "border-red-500/50")}
+                                        className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 transition-all shadow-inner rounded-xl", errors.name && "border-red-500/50")}
                                         {...register("name")}
                                     />
                                     {errors.name && <p className="text-[10px] text-red-500 flex items-center gap-1"><Info size={10} /> {errors.name.message}</p>}
@@ -202,7 +212,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                 <div className="space-y-2">
                                     <Label htmlFor="foodType" className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Food Type</Label>
                                     <Select onValueChange={(value) => setValue("foodType", value as "VEG" | "NON_VEG" | "BOTH")} value={restaurant?.foodType}>
-                                        <SelectTrigger className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus:ring-yellow-500/50">
+                                        <SelectTrigger className="bg-black/40 border-zinc-800 text-zinc-100 focus:ring-yellow-500 focus:border-yellow-500 transition-all shadow-inner rounded-xl">
                                             <SelectValue placeholder="Select type" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
@@ -219,7 +229,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                 <Textarea
                                     id="description"
                                     placeholder="Brief description..."
-                                    className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-yellow-500/50 min-h-[70px]"
+                                    className="bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 transition-all shadow-inner rounded-xl min-h-[70px]"
                                     {...register("description")}
                                 />
                             </div>
@@ -230,7 +240,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                     <Input
                                         id="phone"
                                         placeholder="+91 98765 43210"
-                                        className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-yellow-500/50", errors.phone && "border-red-500/50")}
+                                        className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 transition-all shadow-inner rounded-xl", errors.phone && "border-red-500/50")}
                                         {...register("phone")}
                                     />
                                     {errors.phone && <p className="text-[10px] text-red-500 flex items-center gap-1"><Info size={10} /> {errors.phone.message}</p>}
@@ -240,7 +250,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                     <Input
                                         id="nearestPlace"
                                         placeholder="Near City Mall"
-                                        className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-yellow-500/50"
+                                        className="bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 transition-all shadow-inner rounded-xl"
                                         {...register("nearestPlace")}
                                     />
                                 </div>
@@ -298,7 +308,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="w-full h-36 rounded-xl border-2 border-dashed border-zinc-700 hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all flex flex-col items-center justify-center gap-3 group cursor-pointer"
+                                    className="w-full h-36 rounded-2xl border-2 border-dashed border-zinc-700 bg-black/20 hover:border-yellow-500 hover:bg-yellow-500/10 transition-all flex flex-col items-center justify-center gap-3 group cursor-pointer"
                                 >
                                     <div className="w-12 h-12 rounded-xl bg-zinc-800 group-hover:bg-yellow-500/10 flex items-center justify-center transition-colors">
                                         <ImagePlus size={22} className="text-zinc-500 group-hover:text-yellow-500 transition-colors" />
@@ -330,7 +340,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                 <Input
                                     id="locality"
                                     placeholder="Sector 18"
-                                    className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-yellow-500/50", errors.locality && "border-red-500/50")}
+                                    className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 transition-all shadow-inner rounded-xl", errors.locality && "border-red-500/50")}
                                     {...register("locality")}
                                 />
                                 {errors.locality && <p className="text-[10px] text-red-500 flex items-center gap-1"><Info size={10} /> {errors.locality.message}</p>}
@@ -342,7 +352,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                     <Input
                                         id="city"
                                         placeholder="City"
-                                        className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-yellow-500/50", errors.city && "border-red-500/50")}
+                                        className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 transition-all shadow-inner rounded-xl", errors.city && "border-red-500/50")}
                                         {...register("city")}
                                     />
                                 </div>
@@ -351,7 +361,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                     <Input
                                         id="state"
                                         placeholder="State"
-                                        className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-yellow-500/50", errors.state && "border-red-500/50")}
+                                        className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 transition-all shadow-inner rounded-xl", errors.state && "border-red-500/50")}
                                         {...register("state")}
                                     />
                                 </div>
@@ -361,31 +371,32 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                         id="pincode"
                                         placeholder="6 Digits"
                                         maxLength={6}
-                                        className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-yellow-500/50", errors.pincode && "border-red-500/50")}
+                                        className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-yellow-500 focus-visible:border-yellow-500 transition-all shadow-inner rounded-xl", errors.pincode && "border-red-500/50")}
                                         {...register("pincode")}
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex gap-3 justify-end pt-4 border-t border-zinc-800">
-                            <Button type="button" variant="ghost" onClick={handleClose} className="text-zinc-400 hover:text-white hover:bg-zinc-900">
+                        <div className="flex gap-3 justify-end pt-6 border-t border-zinc-800/50 mt-6">
+                            <Button type="button" variant="ghost" onClick={handleClose} className="text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-xl">
                                 Cancel
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isPending}
-                                className="bg-gradient-to-br from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-white font-bold px-8 shadow-lg shadow-yellow-600/20"
+                                className="bg-gradient-to-r from-yellow-500 to-orange-400 hover:from-yellow-400 hover:to-orange-300 text-black font-black px-8 rounded-xl shadow-[0_0_30px_rgba(234,179,8,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 {isPending ? (
-                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
+                                    <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Saving...</>
                                 ) : (
-                                    <><Pencil className="mr-2 h-4 w-4" /> Save Changes</>
+                                    <><Pencil className="mr-2 h-5 w-5" /> Save Changes</>
                                 )}
                             </Button>
                         </div>
                     </form>
                 )}
+                </div>
             </DialogContent>
         </Dialog>
     );

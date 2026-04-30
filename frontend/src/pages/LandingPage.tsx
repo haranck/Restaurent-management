@@ -59,7 +59,7 @@ const TESTIMONIALS = [
   {
     name: "Marco Rossi",
     role: "Owner, Osteria Roma",
-    text: "DineManager completely transformed how we run our kitchen. Orders are faster, waste is down, and staff love the interface.",
+    text: "DineMap completely transformed how we run our kitchen. Orders are faster, waste is down, and staff love the interface.",
     rating: 5,
   },
   {
@@ -331,7 +331,7 @@ export const LandingPage = () => {
             Everything your restaurant needs
           </h2>
           <p style={{ fontSize: "14px", color: "#5a7048", maxWidth: "480px", margin: "0 auto" }}>
-            From the first order of the day to closing time — DineManager keeps everything running smoothly.
+            From the first order of the day to closing time — DineMap keeps everything running smoothly.
           </p>
         </div>
 
@@ -477,7 +477,7 @@ export const LandingPage = () => {
             Ready to transform your restaurant?
           </h2>
           <p style={{ fontSize: "13px", color: "#5a7048", marginBottom: "32px", lineHeight: 1.7 }}>
-            Join 500+ restaurants already using DineManager to serve better and grow faster.
+            Join 500+ restaurants already using DineMap to serve better and grow faster.
           </p>
           <button
             onClick={() => navigate(user ? "/shops" : "/signup")}

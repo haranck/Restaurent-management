@@ -27,8 +27,8 @@ export const ShopsPage = () => {
             
             <div className="pt-20">
                 <Shop 
-                    title="Global Directory"
-                    subtitle="Explore all restaurants in the DineManager network."
+                    title="Explore Network"
+                    subtitle="Explore all restaurants in the DineMap network."
                     restaurants={restaurants}
                     isLoading={isLoading}
                     isError={isError}

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { ShoppingBag, Search, MapPin, Phone, UtensilsCrossed, Plus, Pencil, Trash2, ArrowRight, Loader2, Star, Clock, User as UserIcon, ImageOff } from "lucide-react";
-import { useDeleteRestaurant } from "../../hooks/Restaurant/RestaurantHooks";
 import { UpdateRestaurantModal } from "../modals/UpdateRestaurantModal";
+import { DeleteRestaurantModal } from "../modals/DeleteRestaurantModal";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import {
@@ -24,7 +24,6 @@ import {
 import { cn } from "../../lib/utils";
 import type { RootState } from "../../store/store";
 import type { Restaurant } from "../../store/slice/restaurantSlice";
-import toast from "react-hot-toast";
 
 interface Props {
     title?: string;
@@ -58,30 +57,33 @@ export const Shop = ({
     showAddButton = true,
 }: Props) => {
     const user = useSelector((state: RootState) => state.auth.user);
-    const { mutate: deleteRest, isPending: isDeleting } = useDeleteRestaurant();
     const [search, setSearch] = useState("");
     const [filterType, setFilterType] = useState("All");
+    const [filterState, setFilterState] = useState("All");
+    const [filterCity, setFilterCity] = useState("All");
+    const [filterLocality, setFilterLocality] = useState("All");
     const [updateTarget, setUpdateTarget] = useState<Restaurant | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<Restaurant | null>(null);
 
     const foodTypes = ["All", ...Array.from(new Set(restaurants.map((r) => r.foodType).filter((t): t is "VEG" | "NON_VEG" | "BOTH" => Boolean(t))))];
+    
+    const states = ["All", ...Array.from(new Set(restaurants.map(r => r.address?.state).filter(Boolean)))];
+    const cities = ["All", ...Array.from(new Set(restaurants.filter(r => filterState === "All" || r.address?.state === filterState).map(r => r.address?.city).filter(Boolean)))];
+    const localities = ["All", ...Array.from(new Set(restaurants.filter(r => (filterState === "All" || r.address?.state === filterState) && (filterCity === "All" || r.address?.city === filterCity)).map(r => r.address?.locality).filter(Boolean)))];
 
     const filtered = restaurants.filter((r) => {
         const matchSearch =
             r.name.toLowerCase().includes(search.toLowerCase()) ||
-            r.description?.toLowerCase().includes(search.toLowerCase()) ||
-            r.address?.city?.toLowerCase().includes(search.toLowerCase());
-        const matchFilter = filterType === "All" || r.foodType === filterType;
-        return matchSearch && matchFilter;
+            r.description?.toLowerCase().includes(search.toLowerCase());
+        const matchType = filterType === "All" || r.foodType === filterType;
+        const matchState = filterState === "All" || r.address?.state === filterState;
+        const matchCity = filterCity === "All" || r.address?.city === filterCity;
+        const matchLocality = filterLocality === "All" || r.address?.locality === filterLocality;
+
+        return matchSearch && matchType && matchState && matchCity && matchLocality;
     });
 
-    const handleDelete = (id: string) => {
-        if (window.confirm("Are you sure you want to delete this restaurant?")) {
-            deleteRest(id, {
-                onSuccess: () => toast.success("Restaurant deleted."),
-                onError: () => toast.error("Failed to delete restaurant."),
-            });
-        }
-    };
+    // Deletion is now handled by DeleteRestaurantModal
 
     if (isLoading) {
         return (
@@ -125,17 +127,45 @@ export const Shop = ({
                     <p className="text-zinc-500">{subtitle}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                    <div className="relative flex-1 md:w-64 min-w-[200px]">
+                    <div className="relative flex-1 md:w-48 min-w-[150px]">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" size={16} />
                         <Input
-                            placeholder="Search name, city..."
+                            placeholder="Search name..."
                             className="pl-10 bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/30"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
+                    
+                    <Select value={filterState} onValueChange={(val) => { setFilterState(val); setFilterCity("All"); setFilterLocality("All"); }}>
+                        <SelectTrigger className="w-[100px] bg-zinc-900/50 border-zinc-800 text-zinc-300">
+                            <SelectValue placeholder="State" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
+                            {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={filterCity} onValueChange={(val) => { setFilterCity(val); setFilterLocality("All"); }}>
+                        <SelectTrigger className="w-[100px] bg-zinc-900/50 border-zinc-800 text-zinc-300">
+                            <SelectValue placeholder="City" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
+                            {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={filterLocality} onValueChange={setFilterLocality}>
+                        <SelectTrigger className="w-[110px] bg-zinc-900/50 border-zinc-800 text-zinc-300">
+                            <SelectValue placeholder="Locality" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
+                            {localities.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+
                     <Select value={filterType} onValueChange={setFilterType}>
-                        <SelectTrigger className="w-32 bg-zinc-900/50 border-zinc-800 text-zinc-300">
+                        <SelectTrigger className="w-[100px] bg-zinc-900/50 border-zinc-800 text-zinc-300">
                             <SelectValue placeholder="Type" />
                         </SelectTrigger>
                         <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
@@ -145,8 +175,8 @@ export const Shop = ({
                         </SelectContent>
                     </Select>
                     {showAddButton && onOpenCreate && (
-                        <Button onClick={onOpenCreate} className="bg-green-600 hover:bg-green-500 text-white font-bold">
-                            <Plus size={18} className="mr-2" /> New
+                        <Button onClick={onOpenCreate} className="bg-green-600 hover:bg-green-500 text-white font-bold px-3">
+                            <Plus size={18} className="mr-1 sm:mr-2" /> <span className="hidden sm:inline">New</span>
                         </Button>
                     )}
                 </div>
@@ -173,12 +203,6 @@ export const Shop = ({
                                             <span className="text-xs font-medium">No image</span>
                                         </div>
                                     )}
-                                    {/* Food type badge overlaid on image */}
-                                    <div className="absolute top-2 left-2">
-                                        <Badge className={cn("capitalize font-bold border text-xs", foodTypeColors[r.foodType?.toLowerCase()] || "bg-zinc-800 text-zinc-400")}>
-                                            {foodTypeLabels[r.foodType] ?? r.foodType}
-                                        </Badge>
-                                    </div>
                                     {/* Edit/Delete buttons overlaid on image for owner */}
                                     {isOwner && (
                                         <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -194,8 +218,7 @@ export const Shop = ({
                                                 size="icon"
                                                 variant="ghost"
                                                 className="h-8 w-8 bg-zinc-900/80 text-zinc-300 hover:text-red-500 hover:bg-red-500/10 backdrop-blur-sm"
-                                                onClick={() => handleDelete(r.id)}
-                                                disabled={isDeleting}
+                                                onClick={() => setDeleteTarget(r)}
                                             >
                                                 <Trash2 size={13} />
                                             </Button>
@@ -204,7 +227,12 @@ export const Shop = ({
                                 </div>
 
                                 <CardHeader className="p-4 pb-2">
-                                    <CardTitle className="text-base font-bold text-white group-hover:text-green-400 transition-colors line-clamp-1">{r.name}</CardTitle>
+                                    <div className="flex justify-between items-start gap-2 mb-1.5">
+                                        <CardTitle className="text-base font-bold text-white group-hover:text-green-400 transition-colors line-clamp-1">{r.name}</CardTitle>
+                                        <Badge className={cn("capitalize font-bold border text-[10px] px-1.5 py-0 min-w-max", foodTypeColors[r.foodType?.toLowerCase()] || "bg-zinc-800 text-zinc-400")}>
+                                            {foodTypeLabels[r.foodType] ?? r.foodType}
+                                        </Badge>
+                                    </div>
                                     <CardDescription className="text-zinc-500 text-xs line-clamp-2 min-h-[32px]">{r.description || "No description provided."}</CardDescription>
                                 </CardHeader>
 
@@ -260,6 +288,12 @@ export const Shop = ({
             )}
 
             <UpdateRestaurantModal restaurant={updateTarget} onClose={() => setUpdateTarget(null)} />
+            <DeleteRestaurantModal
+                isOpen={!!deleteTarget}
+                onClose={() => setDeleteTarget(null)}
+                restaurantId={deleteTarget?.id ?? null}
+                restaurantName={deleteTarget?.name}
+            />
         </div>
     );
 };

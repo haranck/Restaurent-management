@@ -44,7 +44,7 @@ const Footer = () => {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              DineManager
+              DineMap
             </span>
           </div>
           <p style={{ fontSize: "12px", color: "#5a7048", lineHeight: "1.7", maxWidth: "280px" }}>
@@ -52,9 +52,9 @@ const Footer = () => {
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "20px" }}>
             {[
-              { icon: Mail, text: "support@dinemanager.com" },
-              { icon: Phone, text: "+1 (800) 123-4567" },
-              { icon: MapPin, text: "San Francisco, CA" },
+              { icon: Mail, text: "support@dinemap.com" },
+              { icon: Phone, text: "+1 (555) 123-4567" },
+              { icon: MapPin, text: "123 Culinary Ave, Food District" },
             ].map(({ icon: Icon, text }) => (
               <div key={text} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Icon style={{ width: 12, height: 12, color: "#86bb3c", flexShrink: 0 }} />
@@ -122,9 +122,9 @@ const Footer = () => {
           alignItems: "center",
         }}
       >
-        <p style={{ fontSize: "11px", color: "#3a4a30" }}>
-          © {new Date().getFullYear()} DineManager. All rights reserved.
-        </p>
+        <div style={{ fontSize: "11px", color: "#3a4a30" }}>
+          © {new Date().getFullYear()} DineMap. All rights reserved.
+        </div>
         <p style={{ fontSize: "11px", color: "#3a4a30" }}>
           Built with ❤️ for restaurateurs
         </p>

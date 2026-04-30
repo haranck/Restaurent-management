@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { UtensilsCrossed, User, LogOut, ChevronDown, Bell, Settings } from "lucide-react";
+import { UtensilsCrossed, User, LogOut, ChevronDown, Bell } from "lucide-react";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { clearAuth } from "../store/slice/authSlice";
@@ -18,7 +18,7 @@ const Navbar = () => {
     const handleLogout = () => {
         dispatch(clearAuth());
         dispatch(clearToken());
-        navigate("/login");
+        navigate("/");
     };
 
     return (
@@ -29,7 +29,7 @@ const Navbar = () => {
                     <UtensilsCrossed className="text-white w-[18px] h-[18px]" strokeWidth={2.5} />
                 </div>
                 <span className="text-lg font-black tracking-tighter bg-linear-to-br from-green-500 to-yellow-500 bg-clip-text text-transparent">
-                    DineManager
+                    DineMap
                 </span>
             </Link>
 
@@ -83,12 +83,6 @@ const Navbar = () => {
                                         <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Account</p>
                                         <p className="text-sm font-bold text-zinc-200 truncate">{user.email}</p>
                                     </div>
-                                    <button className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-bold text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-xl transition-all group">
-                                        <User size={16} className="group-hover:text-green-500" /> My Profile
-                                    </button>
-                                    <button className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-bold text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-xl transition-all group">
-                                        <Settings size={16} className="group-hover:text-green-500" /> Settings
-                                    </button>
                                     <div className="h-px bg-zinc-900 my-2" />
                                     <button
                                         onClick={handleLogout}
@@ -102,7 +96,7 @@ const Navbar = () => {
                     </div>
                 ) : (
                     <Button
-                        onClick={() => navigate("/login")}
+                        onClick={() => navigate("/")}
                         className="bg-linear-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold rounded-xl px-6 shadow-lg shadow-green-600/20"
                     >
                         Sign In

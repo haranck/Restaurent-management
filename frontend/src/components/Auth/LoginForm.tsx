@@ -85,7 +85,7 @@ const LoginForm = ({ onSwitchToSignUp, onSubmit, isLoading }: LoginFormProps) =>
               WebkitTextFillColor: "transparent",
             }}
           >
-            DineManager
+            DineMap
           </p>
           <p style={{ fontSize: "11px", color: "#7a9060", fontWeight: 500, marginTop: "-1px" }}>
             Restaurant Management

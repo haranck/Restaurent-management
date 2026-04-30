@@ -104,10 +104,11 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                 toast.success("Restaurant created successfully!");
                 setTimeout(() => handleClose(), 1500);
             },
-            onError: (error: any) => {
-                console.error("Create Restaurant Error:", error?.response?.data || error);
-                if (error?.response?.data?.message) {
-                    toast.error(error.response.data.message);
+            onError: (error: unknown) => {
+                const err = error as { response?: { data?: { message?: string } } };
+                console.error("Create Restaurant Error:", err?.response?.data || error);
+                if (err?.response?.data?.message) {
+                    toast.error(err.response.data.message);
                 } else if (error instanceof Error) {
                     toast.error(error.message);
                 } else {
@@ -126,15 +127,22 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent className="sm:max-w-[620px] bg-zinc-950 border-zinc-800 text-zinc-100 overflow-y-auto max-h-[90vh]">
-                <DialogHeader className="flex flex-row items-center gap-4 space-y-0 pb-6 border-b border-zinc-800">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-green-500/20">
-                        <UtensilsCrossed className="text-white" size={24} />
+            <DialogContent className="w-[95vw] sm:w-full sm:max-w-[650px]  mt-10 bg-zinc-950/80 backdrop-blur-3xl border-zinc-800/50 shadow-[0_0_100px_rgba(34,197,94,0.15)] text-zinc-100 overflow-x-hidden overflow-y-auto max-h-[90vh] p-0">
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-500/10 blur-[100px] pointer-events-none rounded-full" />
+                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-500/10 blur-[100px] pointer-events-none rounded-full" />
+                
+                <div className="p-5 sm:p-8 relative z-10">
+                <DialogHeader className="flex flex-row items-center gap-5 space-y-0 pb-6 border-b border-zinc-800/50">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-green-500/20 blur-xl rounded-full" />
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg ring-1 ring-white/20 relative z-10">
+                            <UtensilsCrossed className="text-black" size={24} strokeWidth={2.5} />
+                        </div>
                     </div>
                     <div className="flex-1 text-left">
-                        <DialogTitle className="text-xl font-bold tracking-tight">Add Restaurant</DialogTitle>
-                        <DialogDescription className="text-zinc-500 text-sm">
-                            Register a new restaurant in your management network.
+                        <DialogTitle className="text-2xl font-black tracking-tight text-white">Add Restaurant</DialogTitle>
+                        <DialogDescription className="text-zinc-400 text-sm font-medium mt-1">
+                            Expand your culinary empire. Fill in the details below.
                         </DialogDescription>
                     </div>
                 </DialogHeader>
@@ -164,7 +172,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                     <Input
                                         id="name"
                                         placeholder="The Golden Fork"
-                                        className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/50", errors.name && "border-red-500/50")}
+                                        className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-green-500 focus-visible:border-green-500 transition-all shadow-inner rounded-xl", errors.name && "border-red-500/50")}
                                         {...register("name")}
                                     />
                                     {errors.name && <p className="text-[10px] text-red-500 flex items-center gap-1"><Info size={10} /> {errors.name.message}</p>}
@@ -172,7 +180,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                 <div className="space-y-2">
                                     <Label htmlFor="foodType" className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Food Type *</Label>
                                     <Select onValueChange={(value) => setValue("foodType", value as "VEG" | "NON_VEG" | "BOTH")} defaultValue="VEG">
-                                        <SelectTrigger className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus:ring-green-500/50">
+                                        <SelectTrigger className="bg-black/40 border-zinc-800 text-zinc-100 focus:ring-green-500 focus:border-green-500 transition-all shadow-inner rounded-xl">
                                             <SelectValue placeholder="Select type" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
@@ -189,7 +197,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                 <Textarea
                                     id="description"
                                     placeholder="Brief description of your restaurant..."
-                                    className="bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/50 min-h-[70px]"
+                                    className="bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-green-500 focus-visible:border-green-500 transition-all shadow-inner rounded-xl min-h-[70px]"
                                     {...register("description")}
                                 />
                             </div>
@@ -200,7 +208,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                     <Input
                                         id="phone"
                                         placeholder="+91 99999 00000"
-                                        className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/50", errors.phone && "border-red-500/50")}
+                                        className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-green-500 focus-visible:border-green-500 transition-all shadow-inner rounded-xl", errors.phone && "border-red-500/50")}
                                         {...register("phone")}
                                     />
                                     {errors.phone && <p className="text-[10px] text-red-500 flex items-center gap-1"><Info size={10} /> {errors.phone.message}</p>}
@@ -210,7 +218,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                     <Input
                                         id="nearestPlace"
                                         placeholder="Near City Mall"
-                                        className="bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/50"
+                                        className="bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-green-500 focus-visible:border-green-500 transition-all shadow-inner rounded-xl"
                                         {...register("nearestPlace")}
                                     />
                                 </div>
@@ -247,7 +255,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="w-full h-36 rounded-xl border-2 border-dashed border-zinc-700 hover:border-green-500/50 hover:bg-green-500/5 transition-all flex flex-col items-center justify-center gap-3 group cursor-pointer"
+                                    className="w-full h-36 rounded-2xl border-2 border-dashed border-zinc-700 bg-black/20 hover:border-green-500 hover:bg-green-500/10 transition-all flex flex-col items-center justify-center gap-3 group cursor-pointer"
                                 >
                                     <div className="w-12 h-12 rounded-xl bg-zinc-800 group-hover:bg-green-500/10 flex items-center justify-center transition-colors">
                                         <ImagePlus size={22} className="text-zinc-500 group-hover:text-green-500 transition-colors" />
@@ -279,7 +287,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                 <Input
                                     id="locality"
                                     placeholder="Sector 18"
-                                    className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/50", errors.locality && "border-red-500/50")}
+                                    className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-green-500 focus-visible:border-green-500 transition-all shadow-inner rounded-xl", errors.locality && "border-red-500/50")}
                                     {...register("locality")}
                                 />
                                 {errors.locality && <p className="text-[10px] text-red-500 flex items-center gap-1"><Info size={10} /> {errors.locality.message}</p>}
@@ -291,7 +299,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                     <Input
                                         id="city"
                                         placeholder="Mumbai"
-                                        className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/50", errors.city && "border-red-500/50")}
+                                        className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-green-500 focus-visible:border-green-500 transition-all shadow-inner rounded-xl", errors.city && "border-red-500/50")}
                                         {...register("city")}
                                     />
                                 </div>
@@ -300,7 +308,7 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                     <Input
                                         id="state"
                                         placeholder="Maharashtra"
-                                        className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/50", errors.state && "border-red-500/50")}
+                                        className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-green-500 focus-visible:border-green-500 transition-all shadow-inner rounded-xl", errors.state && "border-red-500/50")}
                                         {...register("state")}
                                     />
                                 </div>
@@ -310,31 +318,32 @@ export const CreateRestaurantModal = ({ isOpen, onClose }: Props) => {
                                         id="pincode"
                                         placeholder="400001"
                                         maxLength={6}
-                                        className={cn("bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-green-500/50", errors.pincode && "border-red-500/50")}
+                                        className={cn("bg-black/40 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-green-500 focus-visible:border-green-500 transition-all shadow-inner rounded-xl", errors.pincode && "border-red-500/50")}
                                         {...register("pincode")}
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex gap-3 justify-end pt-4 border-t border-zinc-800">
-                            <Button type="button" variant="ghost" onClick={handleClose} className="text-zinc-400 hover:text-white hover:bg-zinc-900">
+                        <div className="flex gap-3 justify-end pt-6 border-t border-zinc-800/50 mt-6">
+                            <Button type="button" variant="ghost" onClick={handleClose} className="text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-xl">
                                 Cancel
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isPending}
-                                className="bg-gradient-to-br from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold px-8 shadow-lg shadow-green-600/20"
+                                className="bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-400 hover:to-emerald-300 text-black font-black px-8 rounded-xl shadow-[0_0_30px_rgba(34,197,94,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 {isPending ? (
-                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...</>
+                                    <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Creating...</>
                                 ) : (
-                                    <><UtensilsCrossed className="mr-2 h-4 w-4" /> Add Restaurant</>
+                                    <><UtensilsCrossed className="mr-2 h-5 w-5" /> Add Restaurant</>
                                 )}
                             </Button>
                         </div>
                     </form>
                 )}
+                </div>
             </DialogContent>
         </Dialog>
     );
