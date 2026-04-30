@@ -3,8 +3,22 @@ import { IRegisterUserService } from "../services/user/register/IRegisterUserSer
 import { RegisterUserService } from "../services/user/register/RegisterUserService";
 import { ILoginUserService } from "../services/user/login/ILoginUserService";
 import { LoginUserService } from "../services/user/login/LoginUserService";
-// import { ILogoutUserService } from "../services/user/logout/ILogoutUserService";
-// import { LogoutUserService } from "../services/user/logout/LogoutUserService";
+import { ILogoutUserService } from "../services/user/logout/ILogoutUserService";
+import { LogoutUserService } from "../services/user/logout/LogoutUserService";
+import { IRestaurantCreateService } from "../services/restaurant/create/IRestaurantCreateService";
+import { RestaurantCreateService } from "../services/restaurant/create/RestaurantCreateService";
+import { IRestaurantUpdateService } from "../services/restaurant/update/IRestaurantUpdateService";
+import { RestaurantUpdateService } from "../services/restaurant/update/RestaurantUpdateService";
+import { IRestaurantDeleteService } from "../services/restaurant/delete/IRestaurantDeleteService";
+import { RestaurantDeleteService } from "../services/restaurant/delete/RestaurantDeleteService";
+import { IFetchRestaurantService } from "../services/restaurant/fetch/IFetchRestaurantService";
+import { FetchRestaurantService } from "../services/restaurant/fetch/FetchRestaurantService";
+import { IJwtService } from "../services/jwt/IJwtServices";
+import { JwtService } from "../services/jwt/JwtServices";
+import { IRefreshTokenService } from "../services/refreshToken/IRefreshTokenService";
+import { RefreshTokenService } from "../services/refreshToken/RefreshTokenService";
+import { ICloudinaryService } from "../services/cloudinary/ICloudinaryService";
+import { CloudinaryService } from "../services/cloudinary/CloudinaryService";
 
 export class ServiceModule {
     static registerModules(): void {
@@ -14,8 +28,36 @@ export class ServiceModule {
         container.register<ILoginUserService>("ILoginUserService", {
             useClass: LoginUserService
         });
-        // container.register<ILogoutUserService>("ILogoutUserService", {
-        //     useClass: LogoutUserService
-        // });
+        container.register<ILogoutUserService>("ILogoutUserService", {
+            useClass: LogoutUserService
+        });
+
+        container.register<IRestaurantCreateService>("IRestaurantCreateService", {
+            useClass: RestaurantCreateService
+        });
+
+        container.register<IRestaurantUpdateService>("IRestaurantUpdateService", {
+            useClass: RestaurantUpdateService
+        });
+
+        container.register<IRestaurantDeleteService>("IRestaurantDeleteService", {
+            useClass: RestaurantDeleteService
+        });
+
+        container.register<IFetchRestaurantService>("IFetchRestaurantService", {
+            useClass: FetchRestaurantService
+        });
+
+        container.register<IJwtService>("IJwtService", {
+            useClass: JwtService
+        });
+
+        container.register<IRefreshTokenService>("IRefreshTokenService", {
+            useClass: RefreshTokenService
+        });
+
+        container.register<ICloudinaryService>("ICloudinaryService", {
+            useClass: CloudinaryService
+        });
     }
 }

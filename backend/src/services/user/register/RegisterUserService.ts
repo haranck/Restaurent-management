@@ -3,6 +3,7 @@ import { IUserRepository } from "../../../repositories/user/IUserRepository";
 import { hashPassword } from "../../../utils/hash";
 import { IRegisterUserService } from "./IRegisterUserService";
 import { User } from "@prisma/client";
+import { CreateUserInput } from "../../../DTO/UserDTO";
 
 @injectable()
 export class RegisterUserService implements IRegisterUserService {
@@ -10,7 +11,7 @@ export class RegisterUserService implements IRegisterUserService {
         @inject('IUserRepository') private userRepo: IUserRepository
     ) { }
 
-    async signup(data: { email: string; name: string; password: string }): Promise<User> {
+    async signup(data: CreateUserInput): Promise<User> {
         const { email, name, password } = data;
 
         const existingUser = await this.userRepo.findByEmail(email)

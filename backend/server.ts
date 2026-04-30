@@ -1,79 +1,28 @@
 import "reflect-metadata";
 import dotenv from "dotenv";
-import express, { Request, Response } from "express";
-import cors from "cors";
-import userRoutes from "./src/routes/user.routes";
-
 dotenv.config();
 
-const app = express();
+import express, { Request, Response } from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import userRoutes from "./src/routes/user.routes";
+import restaurantRoutes from "./src/routes/restaurant.routes";
+
+
+const app = express(); 
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+    origin: ["http://localhost:5173", "http://localhost:3000", "http://localhost:5174", "http://127.0.0.1:5173"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use("/api/auth",userRoutes);
-
-// import prisma from "./src/config/prisma";
-// import bcrypt from "bcryptjs";
-
-// // Health Check / Basic Route
-// app.get("/", (req: Request, res: Response) => {
-//   res.json({
-//     status: "success",
-//     message: "Restaurant Management API is running",
-//     version: "1.0.0",
-//   });
-// });
-
-// // Simple route to check and create a user
-// app.get("/test-create-user", async (req: Request, res: Response) => {
-//   try {
-//     const hashedPassword = await bcrypt.hash("1234", 10);
-//     const email = `haranckkk@gmail.com`
-    
-//     const user = await prisma.user.create({
-//       data: {
-//         email: email,
-//         name: "Haran",
-//         password: hashedPassword,
-//       },
-//     });
-
-//     res.json({
-//       status: "success",
-//       message: "✅ User saved to database!",
-//       data: user,
-//     });
-//   } catch (error: any) {
-//     res.status(500).json({
-//       status: "error",
-//       message: "❌ Failed to save user",
-//       error: error.message,
-//     });
-//   }
-// });
-
-// // NEW: Route to see all users currently in the database
-// app.get("/users", async (req: Request, res: Response) => {
-//   try {
-//     const users = await prisma.user.findMany({
-//       orderBy: { createdAt: "desc" }
-//     });
-    
-//     res.json({
-//       status: "success",
-//       count: users.length,
-//       users: users,
-//     });
-//   } catch (error: any) {
-//     res.status(500).json({
-//       status: "error",
-//       message: "Could not fetch users",
-//       error: error.message,
-//     });
-//   }
-// });
+app.use("/api/restaurant", restaurantRoutes);
 
 async function startServer() {
     try {
