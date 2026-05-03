@@ -22,7 +22,7 @@ export class JwtService implements IJwtService {
         try {
             return jwt.verify(token, this._ACCESS_SECRET) as JwtPayload
         } catch {
-            throw new Error("Invalid Access Token")
+            return null
         }
     }
 
@@ -30,7 +30,7 @@ export class JwtService implements IJwtService {
         try {
             return jwt.verify(token, this._REFRESH_SECRET) as JwtPayload
         } catch {
-            throw new Error('Invalid Refresh Token')
+            return null
         }
     }
 }
