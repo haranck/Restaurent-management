@@ -65,28 +65,22 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
     const {
         register,
         handleSubmit,
-        reset: resetForm,
         setValue,
         formState: { errors },
-    } = useForm<UpdateFormData>({ resolver: zodResolver(updateSchema) });
-
-    useEffect(() => {
-        if (restaurant) {
-            setImageFile(null);
-            setImagePreview(null);
-            resetForm({
-                name: restaurant.name,
-                description: restaurant.description || "",
-                phone: restaurant.phone,
-                foodType: restaurant.foodType,
-                nearestPlace: restaurant.nearestPlace || "",
-                locality: restaurant.address?.locality,
-                city: restaurant.address?.city,
-                state: restaurant.address?.state,
-                pincode: restaurant.address?.pincode,
-            });
-        }
-    }, [restaurant, resetForm]);
+    } = useForm<UpdateFormData>({ 
+        resolver: zodResolver(updateSchema),
+        values: restaurant ? {
+            name: restaurant.name,
+            description: restaurant.description || "",
+            phone: restaurant.phone,
+            foodType: restaurant.foodType,
+            nearestPlace: restaurant.nearestPlace || "",
+            locality: restaurant.address?.locality,
+            city: restaurant.address?.city,
+            state: restaurant.address?.state,
+            pincode: restaurant.address?.pincode,
+        } : undefined
+    });
 
     const handleImageChange = (file: File | null) => {
         if (!file) return;

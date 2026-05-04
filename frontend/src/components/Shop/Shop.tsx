@@ -317,8 +317,13 @@ export const Shop = ({
                 </div>
             )}
 
-            <UpdateRestaurantModal restaurant={updateTarget} onClose={() => setUpdateTarget(null)} />
+            <UpdateRestaurantModal 
+                key={updateTarget?.id || "update-modal"} 
+                restaurant={updateTarget} 
+                onClose={() => setUpdateTarget(null)} 
+            />
             <DeleteRestaurantModal
+                key={deleteTarget?.id || "delete-modal"}
                 isOpen={!!deleteTarget}
                 onClose={() => setDeleteTarget(null)}
                 restaurantId={deleteTarget?.id ?? null}
