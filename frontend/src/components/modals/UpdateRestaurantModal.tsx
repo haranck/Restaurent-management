@@ -70,25 +70,23 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
         formState: { errors },
     } = useForm<UpdateFormData>({ resolver: zodResolver(updateSchema) });
 
-    const [prevRestaurantId, setPrevRestaurantId] = useState<string | null>(null);
-
-    // Adjust state during render when the restaurant changes to avoid cascading renders
-    if (restaurant && restaurant.id !== prevRestaurantId) {
-        setPrevRestaurantId(restaurant.id);
-        setImageFile(null);
-        setImagePreview(null);
-        resetForm({
-            name: restaurant.name,
-            description: restaurant.description || "",
-            phone: restaurant.phone,
-            foodType: restaurant.foodType,
-            nearestPlace: restaurant.nearestPlace || "",
-            locality: restaurant.address?.locality,
-            city: restaurant.address?.city,
-            state: restaurant.address?.state,
-            pincode: restaurant.address?.pincode,
-        });
-    }
+    useEffect(() => {
+        if (restaurant) {
+            setImageFile(null);
+            setImagePreview(null);
+            resetForm({
+                name: restaurant.name,
+                description: restaurant.description || "",
+                phone: restaurant.phone,
+                foodType: restaurant.foodType,
+                nearestPlace: restaurant.nearestPlace || "",
+                locality: restaurant.address?.locality,
+                city: restaurant.address?.city,
+                state: restaurant.address?.state,
+                pincode: restaurant.address?.pincode,
+            });
+        }
+    }, [restaurant, resetForm]);
 
     const handleImageChange = (file: File | null) => {
         if (!file) return;

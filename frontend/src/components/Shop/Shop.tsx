@@ -186,7 +186,7 @@ export const Shop = ({
             {filtered.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-500">
                     {filtered.map((r) => {
-                        const isOwner = user?.id === r.userId;
+                        const isOwner = user?.id && r.userId && String(user.id) === String(r.userId);
                         return (
                             <Card key={r.id} className="group bg-zinc-900/30 border-zinc-800 hover:border-green-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/5 relative overflow-hidden flex flex-col">
                                 {/* Image Section */}
@@ -205,22 +205,30 @@ export const Shop = ({
                                     )}
                                     {/* Edit/Delete buttons overlaid on image for owner */}
                                     {isOwner && (
-                                        <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-[-10px] group-hover:translate-y-0 z-20">
                                             <Button
                                                 size="icon"
-                                                variant="ghost"
-                                                className="h-8 w-8 bg-zinc-900/80 text-zinc-300 hover:text-yellow-500 hover:bg-yellow-500/10 backdrop-blur-sm"
-                                                onClick={() => setUpdateTarget(r)}
+                                                variant="secondary"
+                                                className="h-8 w-8 bg-zinc-900/90 text-yellow-500 hover:bg-yellow-500 hover:text-black border border-yellow-500/30 shadow-lg backdrop-blur-md"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setUpdateTarget(r);
+                                                }}
+                                                title="Edit Restaurant"
                                             >
-                                                <Pencil size={13} />
+                                                <Pencil size={14} strokeWidth={2.5} />
                                             </Button>
                                             <Button
                                                 size="icon"
-                                                variant="ghost"
-                                                className="h-8 w-8 bg-zinc-900/80 text-zinc-300 hover:text-red-500 hover:bg-red-500/10 backdrop-blur-sm"
-                                                onClick={() => setDeleteTarget(r)}
+                                                variant="secondary"
+                                                className="h-8 w-8 bg-zinc-900/90 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/30 shadow-lg backdrop-blur-md"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setDeleteTarget(r);
+                                                }}
+                                                title="Delete Restaurant"
                                             >
-                                                <Trash2 size={13} />
+                                                <Trash2 size={14} strokeWidth={2.5} />
                                             </Button>
                                         </div>
                                     )}
