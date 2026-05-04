@@ -136,8 +136,9 @@ const SignupForm = ({ onSwitchToSignIn, onSubmit, isLoading }: SignupFormProps) 
               autoComplete={f.autoComplete}
               style={inputBase}
               onFocus={focusStyle}
-              onBlur={blurStyle}
-              {...register(f.name)}
+              {...register(f.name, {
+                onBlur: blurStyle
+              })}
             />
             {errors[f.name] && (
               <p style={{ color: "#f87171", fontSize: "10px", marginTop: "4px", marginLeft: "4px" }}>

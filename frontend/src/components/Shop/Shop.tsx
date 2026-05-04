@@ -137,7 +137,7 @@ export const Shop = ({
                         />
                     </div>
                     
-                    <Select value={filterState} onValueChange={(val) => { setFilterState(val); setFilterCity("All"); setFilterLocality("All"); }}>
+                    <Select value={filterState} onValueChange={(val) => { setFilterState(val ?? "All"); setFilterCity("All"); setFilterLocality("All"); }}>
                         <SelectTrigger className="w-[100px] bg-zinc-900/50 border-zinc-800 text-zinc-300">
                             <SelectValue placeholder="State" />
                         </SelectTrigger>
@@ -146,7 +146,7 @@ export const Shop = ({
                         </SelectContent>
                     </Select>
 
-                    <Select value={filterCity} onValueChange={(val) => { setFilterCity(val); setFilterLocality("All"); }}>
+                    <Select value={filterCity} onValueChange={(val) => { setFilterCity(val ?? "All"); setFilterLocality("All"); }}>
                         <SelectTrigger className="w-[100px] bg-zinc-900/50 border-zinc-800 text-zinc-300">
                             <SelectValue placeholder="City" />
                         </SelectTrigger>
@@ -155,7 +155,7 @@ export const Shop = ({
                         </SelectContent>
                     </Select>
 
-                    <Select value={filterLocality} onValueChange={setFilterLocality}>
+                    <Select value={filterLocality} onValueChange={(val) => setFilterLocality(val ?? "All")}>
                         <SelectTrigger className="w-[110px] bg-zinc-900/50 border-zinc-800 text-zinc-300">
                             <SelectValue placeholder="Locality" />
                         </SelectTrigger>
@@ -164,7 +164,7 @@ export const Shop = ({
                         </SelectContent>
                     </Select>
 
-                    <Select value={filterType} onValueChange={setFilterType}>
+                    <Select value={filterType} onValueChange={(val) => setFilterType(val ?? "All")}>
                         <SelectTrigger className="w-[100px] bg-zinc-900/50 border-zinc-800 text-zinc-300">
                             <SelectValue placeholder="Type" />
                         </SelectTrigger>

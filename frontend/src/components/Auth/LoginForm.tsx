@@ -123,8 +123,7 @@ const LoginForm = ({ onSwitchToSignUp, onSubmit, isLoading }: LoginFormProps) =>
             autoComplete="email"
             style={inputBase}
             onFocus={focusStyle}
-            onBlur={blurStyle}
-            {...register("email")}
+            {...register("email", { onBlur: blurStyle })}
           />
           {errors.email && (
             <p style={{ color: "#f87171", fontSize: "10px", marginTop: "4px", marginLeft: "4px" }}>
@@ -141,8 +140,7 @@ const LoginForm = ({ onSwitchToSignUp, onSubmit, isLoading }: LoginFormProps) =>
             autoComplete="current-password"
             style={inputBase}
             onFocus={focusStyle}
-            onBlur={blurStyle}
-            {...register("password")}
+            {...register("password", { onBlur: blurStyle })}
           />
           {errors.password && (
             <p style={{ color: "#f87171", fontSize: "10px", marginTop: "4px", marginLeft: "4px" }}>
