@@ -4,9 +4,9 @@
   "description": "Restaurant Management System - Backend API",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "nodemon server.ts",
+    "dev": "nodemon src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js", 
+    "start": "node dist/server.js",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
