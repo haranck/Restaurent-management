@@ -86,4 +86,4 @@ export class UserController {
             res.status(500).json({ message: "Failed to logout user", error: error.message });
         }
     }
-}
+} 
