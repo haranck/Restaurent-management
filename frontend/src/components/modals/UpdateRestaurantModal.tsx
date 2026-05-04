@@ -211,7 +211,7 @@ export const UpdateRestaurantModal = ({ restaurant, onClose }: Props) => {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="foodType" className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Food Type</Label>
-                                    <Select onValueChange={(value) => setValue("foodType", value as "VEG" | "NON_VEG" | "BOTH")} value={restaurant?.foodType}>
+                                    <Select onValueChange={(value) => setValue("foodType", value as "VEG" | "NON_VEG" | "BOTH")} defaultValue={restaurant?.foodType}>
                                         <SelectTrigger className="bg-black/40 border-zinc-800 text-zinc-100 focus:ring-yellow-500 focus:border-yellow-500 transition-all shadow-inner rounded-xl">
                                             <SelectValue placeholder="Select type" />
                                         </SelectTrigger>

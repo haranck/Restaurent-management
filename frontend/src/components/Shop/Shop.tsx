@@ -255,7 +255,7 @@ export const Shop = ({
                                     )}
                                 </CardContent>
 
-                                <CardFooter className="p-4 pt-2 border-t border-zinc-800/50 flex items-center justify-between">
+                                <CardFooter className="p-4 pt-2 border-t border-zinc-800/50 flex flex-wrap items-center justify-between gap-3">
                                     <div className="flex items-center gap-4">
                                         <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-600 uppercase tracking-tighter">
                                             <Clock size={11} /> Live
@@ -264,9 +264,31 @@ export const Shop = ({
                                             <Star size={11} className="text-yellow-500/50" /> 4.8
                                         </div>
                                     </div>
-                                    <Button variant="link" className="h-auto p-0 text-green-500 hover:text-green-400 text-xs font-bold group/btn">
-                                        View Details <ArrowRight size={11} className="ml-1 group-hover/btn:translate-x-1 transition-transform" />
-                                    </Button>
+                                    <div className="flex items-center gap-2">
+                                        {isOwner && (
+                                            <>
+                                                <Button 
+                                                    onClick={() => setUpdateTarget(r)}
+                                                    variant="ghost" 
+                                                    size="sm" 
+                                                    className="h-8 px-2 text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/10 font-bold text-[10px] uppercase tracking-wider"
+                                                >
+                                                    <Pencil size={12} className="mr-1" /> Edit
+                                                </Button>
+                                                <Button 
+                                                    onClick={() => setDeleteTarget(r)}
+                                                    variant="ghost" 
+                                                    size="sm" 
+                                                    className="h-8 px-2 text-red-500 hover:text-red-400 hover:bg-red-500/10 font-bold text-[10px] uppercase tracking-wider"
+                                                >
+                                                    <Trash2 size={12} className="mr-1" /> Delete
+                                                </Button>
+                                            </>
+                                        )}
+                                        <Button variant="link" className="h-auto p-0 text-green-500 hover:text-green-400 text-xs font-bold group/btn">
+                                            View Details <ArrowRight size={11} className="ml-1 group-hover/btn:translate-x-1 transition-transform" />
+                                        </Button>
+                                    </div>
                                 </CardFooter>
                             </Card>
                         );
