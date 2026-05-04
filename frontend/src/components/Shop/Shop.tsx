@@ -187,8 +187,14 @@ export const Shop = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-500">
                     {filtered.map((r) => {
                         const currentUserId = user?.id;
+                        const currentUserEmail = user?.email;
                         const restaurantUserId = r.userId || r.user?.id;
-                        const isOwner = !!(currentUserId && restaurantUserId && String(currentUserId) === String(restaurantUserId));
+                        const restaurantUserEmail = r.user?.email;
+
+                        const isOwner = !!(
+                            (currentUserId && restaurantUserId && String(currentUserId) === String(restaurantUserId)) ||
+                            (currentUserEmail && restaurantUserEmail && currentUserEmail.toLowerCase() === restaurantUserEmail.toLowerCase())
+                        );
                         return (
                             <Card key={r.id} className="group bg-zinc-900/30 border-zinc-800 hover:border-green-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/5 relative overflow-hidden flex flex-col">
                                 {/* Image Section */}
