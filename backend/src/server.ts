@@ -5,8 +5,8 @@ dotenv.config();
 import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import userRoutes from "./src/routes/user.routes";
-import restaurantRoutes from "./src/routes/restaurant.routes";
+import userRoutes from "./routes/user.routes";
+import restaurantRoutes from "./routes/restaurant.routes";
 
 
 const app = express(); 
