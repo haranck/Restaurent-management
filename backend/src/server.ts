@@ -15,7 +15,8 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://dine-map.vercel.app"
+        "https://dine-map.vercel.app",
+        "https://dine-enifu6nfl-harankrishna03-gmailcoms-projects.vercel.app" 
     ],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]

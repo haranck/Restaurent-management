@@ -31,8 +31,8 @@ export class UserController {
 
             res.cookie("refreshToken", response.refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "lax",
+                secure: true,
+                sameSite: "none",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
@@ -52,8 +52,8 @@ export class UserController {
             const response = await this.refreshTokenService.refreshToken(refreshToken);
             res.cookie("refreshToken", response.refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "lax",
+                secure: true,
+                sameSite: "none",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
@@ -78,7 +78,7 @@ export class UserController {
             res.clearCookie("refreshToken", {
                 httpOnly: true,
                 secure: true,
-                sameSite: "strict"
+                sameSite: "none"
             });
 
             res.status(200).json({ message: "User logged out successfully" });
