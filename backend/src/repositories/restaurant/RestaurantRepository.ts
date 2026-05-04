@@ -37,7 +37,12 @@ export class RestaurantRepository implements IRestaurantRepository {
   async findByUserId(userId: string) {
     return prisma.restaurant.findMany({
       where: { userId },
-      include: { address: true },
+      include: { 
+        address: true,
+        user: {
+          select: { id: true, name: true, email: true }
+        }
+      },
       orderBy: { createdAt: "desc" }
     });
   }
