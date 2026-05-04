@@ -27,7 +27,7 @@ export class RestaurantRepository implements IRestaurantRepository {
       include: { 
         address: true, 
         user: { 
-          select: { name: true, email: true } 
+          select: { id: true, name: true, email: true } 
         } 
       },
       orderBy: { createdAt: "desc" }

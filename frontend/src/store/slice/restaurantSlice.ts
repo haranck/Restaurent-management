@@ -16,7 +16,7 @@ export interface Restaurant {
         state: string;
         pincode: string;
     };
-    user?: { name: string; email: string };
+    user?: { id: string; name: string; email: string };
 }
 
 interface RestaurantState {
