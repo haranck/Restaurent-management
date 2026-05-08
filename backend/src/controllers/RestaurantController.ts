@@ -5,115 +5,102 @@ import { IRestaurantCreateService } from "../services/restaurant/create/IRestaur
 import { IRestaurantUpdateService } from "../services/restaurant/update/IRestaurantUpdateService";
 import { IRestaurantDeleteService } from "../services/restaurant/delete/IRestaurantDeleteService";
 import { IFetchRestaurantService } from "../services/restaurant/fetch/IFetchRestaurantService";
+import { HttpStatus } from "../constants/httpStatus.enum";
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "../constants/messages.constant";
+import { sendSuccess, sendError } from "../utils/apiResponse";
+import { AppError } from "../errors";
 
 @injectable()
 export class RestaurantController {
     constructor(
-        @inject("IRestaurantCreateService") private createService: IRestaurantCreateService,
-        @inject("IRestaurantUpdateService") private updateService: IRestaurantUpdateService,
-        @inject("IRestaurantDeleteService") private deleteService: IRestaurantDeleteService,
-        @inject("IFetchRestaurantService") private fetchService: IFetchRestaurantService
+        @inject("IRestaurantCreateService") private readonly _createService: IRestaurantCreateService,
+        @inject("IRestaurantUpdateService") private readonly _updateService: IRestaurantUpdateService,
+        @inject("IRestaurantDeleteService") private readonly _deleteService: IRestaurantDeleteService,
+        @inject("IFetchRestaurantService") private readonly _fetchService: IFetchRestaurantService
     ) {}
 
     create = async (req: AuthRequest, res: Response): Promise<void> => {
         try {
-        
-            const body = req.body || {};
-            let { name, description, phone, foodType, nearestPlace, address } = body;
             const userId = req.user?.userId;
-
             if (!userId) {
-                res.status(401).json({ message: "User not authenticated" });
+                sendError(res, HttpStatus.UNAUTHORIZED, ERROR_MESSAGES.USER_NOT_AUTHENTICATED);
                 return;
             }
 
-            if (!name || !phone || !foodType) {
-                res.status(400).json({ message: "name, phone and foodType are required" });
-                return;
-            }
+            const { name, description, phone, foodType, nearestPlace, address } = req.body;
 
-            if (typeof address === "string") {
-                try {
-                    address = JSON.parse(address);
-                } catch {
-                    res.status(400).json({ message: "Invalid address format - must be valid JSON" });
-                    return;
-                }
-            }
-
-            const restaurant = await this.createService.create({
+            const restaurant = await this._createService.create({
                 name,
                 description,
                 phone,
                 foodType,
                 nearestPlace,
                 address,
-                userId
+                userId,
             }, req.file);
 
-            res.status(201).json({ message: "Restaurant created successfully", restaurant });
+            sendSuccess(res, HttpStatus.CREATED, SUCCESS_MESSAGES.RESTAURANT_CREATED, { restaurant });
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : "An unknown error occurred";
-            console.error("Create restaurant error:", message);
-            res.status(500).json({ message: "Failed to create restaurant", error: message });
+            if (error instanceof AppError) {
+                sendError(res, error.statusCode, error.message);
+                return;
+            }
+            const message = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+            sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, message);
         }
     }
 
     update = async (req: Request, res: Response): Promise<void> => {
         try {
-            const id = String(req.params.id); // Express 5 params can be string | string[]
-            const body = req.body || {};
-            let { name, description, phone, foodType, nearestPlace, address } = body;
+            const id = String(req.params.id);
+            const { name, description, phone, foodType, nearestPlace, address } = req.body;
 
-            if (!id) {
-                res.status(400).json({ message: "Restaurant ID is required" });
-                return;
-            }
-
-            if (typeof address === "string") {
-                try {
-                    address = JSON.parse(address);
-                } catch {
-                    res.status(400).json({ message: "Invalid address format - must be valid JSON" });
-                    return;
-                }
-            }
-
-            const restaurant = await this.updateService.update(id, {
+            const restaurant = await this._updateService.update(id, {
                 name,
                 description,
                 phone,
                 foodType,
                 nearestPlace,
-                address
+                address,
             }, req.file);
 
-            res.status(200).json({ message: "Restaurant updated successfully", restaurant });
+            sendSuccess(res, HttpStatus.OK, SUCCESS_MESSAGES.RESTAURANT_UPDATED, { restaurant });
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : "An unknown error occurred";
-            console.error("Update restaurant error:", message);
-            res.status(500).json({ message: "Failed to update restaurant", error: message });
+            if (error instanceof AppError) {
+                sendError(res, error.statusCode, error.message);
+                return;
+            }
+            const message = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+            sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, message);
         }
     }
 
     delete = async (req: Request, res: Response): Promise<void> => {
         try {
             const id = String(req.params.id);
-            await this.deleteService.delete(id);
-            res.status(200).json({ message: "Restaurant deleted successfully" });
+            await this._deleteService.delete(id);
+            sendSuccess(res, HttpStatus.OK, SUCCESS_MESSAGES.RESTAURANT_DELETED);
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : "An unknown error occurred";
-            res.status(500).json({ message: "Failed to delete restaurant", error: message });
+            if (error instanceof AppError) {
+                sendError(res, error.statusCode, error.message);
+                return;
+            }
+            const message = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+            sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, message);
         }
     }
 
-    fetchAll = async (req: Request, res: Response): Promise<void> => {
+    fetchAll = async (_req: Request, res: Response): Promise<void> => {
         try {
-            const restaurants = await this.fetchService.fetchAll();
-            res.status(200).json({ message: "Restaurants fetched successfully", restaurants });
+            const restaurants = await this._fetchService.fetchAll();
+            sendSuccess(res, HttpStatus.OK, SUCCESS_MESSAGES.RESTAURANTS_FETCHED, { restaurants });
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : "An unknown error occurred";
-            res.status(500).json({ message: "Failed to fetch restaurants", error: message });
+            if (error instanceof AppError) {
+                sendError(res, error.statusCode, error.message);
+                return;
+            }
+            const message = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+            sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, message);
         }
     }
 
@@ -121,14 +108,18 @@ export class RestaurantController {
         try {
             const userId = req.user?.userId;
             if (!userId) {
-                res.status(401).json({ message: "User not authenticated" });
+                sendError(res, HttpStatus.UNAUTHORIZED, ERROR_MESSAGES.USER_NOT_AUTHENTICATED);
                 return;
             }
-            const restaurants = await this.fetchService.fetchByUser(userId);
-            res.status(200).json({ message: "Your restaurants fetched successfully", restaurants });
+            const restaurants = await this._fetchService.fetchByUser(userId);
+            sendSuccess(res, HttpStatus.OK, SUCCESS_MESSAGES.USER_RESTAURANTS_FETCHED, { restaurants });
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : "An unknown error occurred";
-            res.status(500).json({ message: "Failed to fetch your restaurants", error: message });
+            if (error instanceof AppError) {
+                sendError(res, error.statusCode, error.message);
+                return;
+            }
+            const message = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+            sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, message);
         }
     }
 }

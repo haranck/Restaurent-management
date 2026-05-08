@@ -1,19 +1,20 @@
 import multer, { FileFilterCallback } from "multer";
 import { Request } from "express";
+import { ENV } from "../config/env.config";
+import { ERROR_MESSAGES } from "../constants/messages.constant";
 
-// Use memory storage to store files as buffers
 const storage = multer.memoryStorage();
 
 export const upload = multer({
     storage,
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
+        fileSize: ENV.MAX_FILE_SIZE,
     },
-    fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+    fileFilter: (_req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
         if (file.mimetype.startsWith("image/")) {
             cb(null, true);
         } else {
-            cb(new Error("Only images are allowed"));
+            cb(new Error(ERROR_MESSAGES.ONLY_IMAGES_ALLOWED));
         }
-    }
+    },
 });

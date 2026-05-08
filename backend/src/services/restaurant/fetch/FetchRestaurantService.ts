@@ -6,14 +6,14 @@ import { Restaurant } from "@prisma/client";
 @injectable()
 export class FetchRestaurantService implements IFetchRestaurantService {
     constructor(
-        @inject("IRestaurantRepository") private restaurantRepo: IRestaurantRepository
+        @inject("IRestaurantRepository") private readonly _restaurantRepo: IRestaurantRepository
     ) {}
 
     async fetchAll(): Promise<Restaurant[]> {
-        return this.restaurantRepo.findAll();
+        return this._restaurantRepo.findAll();
     }
 
     async fetchByUser(userId: string): Promise<Restaurant[]> {
-        return this.restaurantRepo.findByUserId(userId);
+        return this._restaurantRepo.findByUserId(userId);
     }
 }

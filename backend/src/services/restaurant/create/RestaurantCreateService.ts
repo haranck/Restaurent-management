@@ -8,16 +8,19 @@ import { CreateRestaurantDTO } from "../../../DTO/RestaurantDTO";
 @injectable()
 export class RestaurantCreateService implements IRestaurantCreateService {
     constructor(
-        @inject("IRestaurantRepository") private restaurantRepo: IRestaurantRepository,
-        @inject("ICloudinaryService") private cloudinaryService: ICloudinaryService
+        @inject("IRestaurantRepository") private readonly _restaurantRepo: IRestaurantRepository,
+        @inject("ICloudinaryService") private readonly _cloudinaryService: ICloudinaryService
     ) {}
 
     async create(data: CreateRestaurantDTO, file?: UploadFile): Promise<Restaurant> {
+        const restaurantData = { ...data };
+
         if (file) {
-            const uploadResult = await this.cloudinaryService.uploadImage(file);
-            data.imageUrl = uploadResult.imageUrl;
-            data.imageId = uploadResult.imageId;
+            const uploadResult = await this._cloudinaryService.uploadImage(file);
+            restaurantData.imageUrl = uploadResult.imageUrl;
+            restaurantData.imageId = uploadResult.imageId;
         }
-        return this.restaurantRepo.create(data);
+
+        return this._restaurantRepo.create(restaurantData);
     }
 }

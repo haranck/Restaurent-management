@@ -6,15 +6,15 @@ import { ICloudinaryService } from "../../cloudinary/ICloudinaryService";
 @injectable()
 export class RestaurantDeleteService implements IRestaurantDeleteService {
     constructor(
-        @inject("IRestaurantRepository") private restaurantRepo: IRestaurantRepository,
-        @inject("ICloudinaryService") private cloudinaryService: ICloudinaryService
+        @inject("IRestaurantRepository") private readonly _restaurantRepo: IRestaurantRepository,
+        @inject("ICloudinaryService") private readonly _cloudinaryService: ICloudinaryService
     ) {}
 
     async delete(id: string): Promise<void> {
-        const existingRestaurant = await this.restaurantRepo.findById(id);
+        const existingRestaurant = await this._restaurantRepo.findById(id);
         if (existingRestaurant?.imageId) {
-            await this.cloudinaryService.deleteImage(existingRestaurant.imageId);
+            await this._cloudinaryService.deleteImage(existingRestaurant.imageId);
         }
-        return this.restaurantRepo.delete(id);
+        return this._restaurantRepo.delete(id);
     }
 }

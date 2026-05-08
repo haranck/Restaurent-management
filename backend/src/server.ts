@@ -1,42 +1,40 @@
 import "reflect-metadata";
-import dotenv from "dotenv";
-dotenv.config();
-
-import express, { Request, Response } from "express";
+import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { ENV } from "./config/env.config";
+import { API_PREFIX } from "./constants/routes.constant";
+import { globalErrorHandler } from "./middleware/errorHandler";
 import userRoutes from "./routes/user.routes";
 import restaurantRoutes from "./routes/restaurant.routes";
 
-
 const app = express();
-const PORT = process.env.PORT || 5000;
+
+const corsOrigins = ENV.CORS_ORIGINS.split(",").map((origin) => origin.trim());
 
 app.use(cors({
-    origin: [
-        "http://localhost:5173",
-        "https://dine-map.vercel.app",
-        "https://dine-enifu6nfl-harankrishna03-gmailcoms-projects.vercel.app" 
-    ],
+    origin: corsOrigins,
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use("/api/auth",userRoutes);
-app.use("/api/restaurant", restaurantRoutes);
+app.use(API_PREFIX.AUTH, userRoutes);
+app.use(API_PREFIX.RESTAURANT, restaurantRoutes);
 
-async function startServer() {
+app.use(globalErrorHandler);
+
+async function startServer(): Promise<void> {
     try {
-        app.listen(PORT, () => {
-            console.log(`🚀 Server is running on http://localhost:${PORT}`);
+        app.listen(ENV.PORT, () => {
+            console.log(`🚀 Server is running on http://localhost:${ENV.PORT}`);
         });
-    } catch (error) {
-        console.error("❌ Failed to start server:");
-        console.error(error);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Unknown startup error";
+        console.error("❌ Failed to start server:", message);
         process.exit(1);
     }
 }

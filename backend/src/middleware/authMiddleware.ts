@@ -3,7 +3,9 @@ import { inject, injectable } from "tsyringe";
 import { IJwtService, JwtPayload } from "../services/jwt/IJwtServices";
 import { IUserRepository } from "../repositories/user/IUserRepository";
 import { ITokenBlacklistRepository } from "../repositories/redis/IRedisTokenBlacklistRepository";
-import { HTTP_STATUS, ERROR_MESSAGES } from "../utils/constants";
+import { HttpStatus } from "../constants/httpStatus.enum";
+import { ERROR_MESSAGES } from "../constants/messages.constant";
+import { sendError } from "../utils/apiResponse";
 
 export interface AuthRequest extends Request {
     user?: JwtPayload;
@@ -26,9 +28,7 @@ export class AuthMiddleware {
             const authHeader = req.headers.authorization;
 
             if (!authHeader || !authHeader.startsWith("Bearer ")) {
-                res.status(HTTP_STATUS.UNAUTHORIZED).json({ 
-                    message: ERROR_MESSAGES.UNAUTHORIZED 
-                });
+                sendError(res, HttpStatus.UNAUTHORIZED, ERROR_MESSAGES.UNAUTHORIZED);
                 return;
             }
 
@@ -36,35 +36,28 @@ export class AuthMiddleware {
 
             const isBlacklisted = await this._blacklistRepository.isBlacklisted(token);
             if (isBlacklisted) {
-                res.status(HTTP_STATUS.UNAUTHORIZED).json({ 
-                    message: ERROR_MESSAGES.TOKEN_BLACKLISTED 
-                });
+                sendError(res, HttpStatus.UNAUTHORIZED, ERROR_MESSAGES.TOKEN_BLACKLISTED);
                 return;
             }
 
             const payload = this._jwtService.verifyAccessToken(token);
             if (!payload) {
-                res.status(HTTP_STATUS.UNAUTHORIZED).json({ 
-                    message: ERROR_MESSAGES.INVALID_TOKEN 
-                });
+                sendError(res, HttpStatus.UNAUTHORIZED, ERROR_MESSAGES.INVALID_TOKEN);
                 return;
             }
 
             const user = await this._userRepository.findById(payload.userId);
             if (!user) {
-                res.status(HTTP_STATUS.UNAUTHORIZED).json({ 
-                    message: ERROR_MESSAGES.USER_NOT_FOUND 
-                });
+                sendError(res, HttpStatus.UNAUTHORIZED, ERROR_MESSAGES.USER_NOT_FOUND);
                 return;
             }
 
             req.user = payload;
             next();
 
-        } catch (error) {
-            console.error("Auth Middleware Error:", error);
+        } catch (error: unknown) {
             const message = error instanceof Error ? error.message : ERROR_MESSAGES.AUTHENTICATION_FAILED;
-            res.status(HTTP_STATUS.UNAUTHORIZED).json({ message });
+            sendError(res, HttpStatus.UNAUTHORIZED, message);
         }
     };
 }

@@ -1,36 +1,25 @@
 import { PrismaClient } from "@prisma/client";
-console.log("DEBUG: PrismaClient imported from @prisma/client");
-import path from "path";
-try {
-    const clientPath = require.resolve("@prisma/client");
-    console.log("DEBUG: @prisma/client resolved path:", clientPath);
-} catch (e) {
-    console.log("DEBUG: could not resolve @prisma/client path");
-}
-
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
-import dotenv from "dotenv";
+import { ENV } from "./env.config";
 
-dotenv.config();
-
-const connectionString = process.env.DATABASE_URL;
-
-const pool = new Pool({ connectionString });
+const pool = new Pool({ connectionString: ENV.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 
-const prismaClientSingleton = () => {
-  return new PrismaClient({ adapter });
+const prismaClientSingleton = (): PrismaClient => {
+    return new PrismaClient({ adapter });
 };
 
 type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClientSingleton | undefined;
+    prisma: PrismaClientSingleton | undefined;
 };
 
 const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
 export default prisma;
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (ENV.NODE_ENV !== "production") {
+    globalForPrisma.prisma = prisma;
+}

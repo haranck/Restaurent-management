@@ -4,23 +4,24 @@ import { hashPassword } from "../../../utils/hash";
 import { IRegisterUserService } from "./IRegisterUserService";
 import { User } from "@prisma/client";
 import { CreateUserInput } from "../../../DTO/UserDTO";
+import { ConflictError } from "../../../errors";
+import { ERROR_MESSAGES } from "../../../constants/messages.constant";
 
 @injectable()
 export class RegisterUserService implements IRegisterUserService {
     constructor(
-        @inject('IUserRepository') private userRepo: IUserRepository
+        @inject('IUserRepository') private readonly _userRepo: IUserRepository
     ) { }
 
     async signup(data: CreateUserInput): Promise<User> {
         const { email, name, password } = data;
 
-        const existingUser = await this.userRepo.findByEmail(email)
+        const existingUser = await this._userRepo.findByEmail(email);
         if (existingUser) {
-            throw new Error("User already exists");
+            throw new ConflictError(ERROR_MESSAGES.USER_ALREADY_EXISTS);
         }
+
         const hashedPassword = await hashPassword(password);
-        const user = await this.userRepo.create({ email, name, password: hashedPassword });
-        console.log('User :', user)
-        return user;
+        return this._userRepo.create({ email, name, password: hashedPassword });
     }
 }

@@ -1,3 +1,3 @@
 export interface ILogoutUserService {
-    logout(accesstoken: string): Promise<void>;
+    logout(accessToken: string): Promise<void>;
 }
