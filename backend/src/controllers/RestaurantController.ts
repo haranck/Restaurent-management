@@ -17,9 +17,7 @@ export class RestaurantController {
 
     create = async (req: AuthRequest, res: Response): Promise<void> => {
         try {
-            // req.body is populated by Multer (multipart/form-data parser)
-            // If req.body is undefined here, it means the request Content-Type header
-            // is missing the boundary, which means the frontend sent it incorrectly.
+        
             const body = req.body || {};
             let { name, description, phone, foodType, nearestPlace, address } = body;
             const userId = req.user?.userId;
@@ -34,8 +32,6 @@ export class RestaurantController {
                 return;
             }
 
-            // Multer puts multipart text fields in req.body as strings.
-            // Address is JSON-stringified on the frontend.
             if (typeof address === "string") {
                 try {
                     address = JSON.parse(address);
@@ -74,7 +70,6 @@ export class RestaurantController {
                 return;
             }
 
-            // Address is JSON-stringified on the frontend for multipart requests
             if (typeof address === "string") {
                 try {
                     address = JSON.parse(address);
