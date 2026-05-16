@@ -1,23 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
-export interface Restaurant {
-    id: string;
-    name: string;
-    description: string;
-    phone: string;
-    foodType: "VEG" | "NON_VEG" | "BOTH";
-    nearestPlace: string;
-    userId: string;
-    imageUrl?: string | null;
-    imageId?: string | null;
-    address: {
-        locality: string;
-        city: string;
-        state: string;
-        pincode: string;
-    };
-    user?: { id: string; name: string; email: string };
-}
+import type { Restaurant } from "@/types";
 
 interface RestaurantState {
     allRestaurants: Restaurant[];

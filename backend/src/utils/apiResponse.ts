@@ -1,11 +1,6 @@
 import { Response } from "express";
 import { HttpStatus } from "../constants/httpStatus.enum";
-
-export interface IApiResponse<T = undefined> {
-    success: boolean;
-    message: string;
-    data?: T;
-}
+import { IApiResponse } from "../types/api.types";
 
 export const sendSuccess = <T>(
     res: Response,

@@ -1,7 +1,7 @@
-import { User } from "@prisma/client";
+import { IUser } from "../../../types";
 
 export interface LoginResponse {
-    user: User;
+    user: IUser;
     accessToken: string;
     refreshToken: string;
 }

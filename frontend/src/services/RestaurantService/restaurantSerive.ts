@@ -1,10 +1,11 @@
 import { AxiosInstance } from "../../axios/axios";
+import type { IApiResponse, Restaurant, FoodType } from "@/types";
 
 interface CreateRestaurantPayload {
     name: string;
     description?: string;
     phone: string;
-    foodType: string;
+    foodType: FoodType;
     nearestPlace?: string;
     image?: File;
     address: {
@@ -20,7 +21,7 @@ interface UpdateRestaurantPayload {
     name?: string;
     description?: string;
     phone?: string;
-    foodType?: string;
+    foodType?: FoodType;
     nearestPlace?: string;
     image?: File;
     address?: {
@@ -31,7 +32,7 @@ interface UpdateRestaurantPayload {
     };
 }
 
-export const createRestaurant = async (data: CreateRestaurantPayload) => {
+export const createRestaurant = async (data: CreateRestaurantPayload): Promise<IApiResponse<Restaurant>> => {
     const formData = new FormData();
     formData.append("name", data.name);
     if (data.description) formData.append("description", data.description);
@@ -45,7 +46,7 @@ export const createRestaurant = async (data: CreateRestaurantPayload) => {
     return response.data;
 };
 
-export const updateRestaurant = async (data: UpdateRestaurantPayload) => {
+export const updateRestaurant = async (data: UpdateRestaurantPayload): Promise<IApiResponse<Restaurant>> => {
     const { id, image, address, ...rest } = data;
     const formData = new FormData();
 
@@ -61,17 +62,17 @@ export const updateRestaurant = async (data: UpdateRestaurantPayload) => {
     return response.data;
 };
 
-export const deleteRestaurant = async (id: string) => {
+export const deleteRestaurant = async (id: string): Promise<IApiResponse> => {
     const response = await AxiosInstance.delete(`/restaurant/delete/${id}`);
     return response.data;
 };
 
-export const fetchAllRestaurant = async () => {
+export const fetchAllRestaurant = async (): Promise<IApiResponse<Restaurant[]>> => {
     const response = await AxiosInstance.get("/restaurant/get-restaurant");
     return response.data;
 };
 
-export const fetchMyRestaurants = async () => {
+export const fetchMyRestaurants = async (): Promise<IApiResponse<Restaurant[]>> => {
     const response = await AxiosInstance.get("/restaurant/get-my-restaurant");
     return response.data;
 };
