@@ -1,5 +1,5 @@
 import { AxiosInstance } from "../../axios/axios";
-import type { IApiResponse, IAuthResponse, AuthUser } from "@/types";
+import type { IApiResponse, IAuthResponse, AuthUser } from "../../types";
 
 interface SignupPayload {
     email: string;
