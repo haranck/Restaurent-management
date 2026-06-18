@@ -1,10 +1,11 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { isAxiosError } from "axios";
 import { useSignup } from "../../hooks/Auth/AuthHooks";
 import SignupForm, { type SignupFormData } from "../../components/Auth/SignupForm";
 
-export const SignupPage = () => {
+export const SignupPage: React.FC = () => {
     const { mutate: signupUser, isPending } = useSignup();
     const navigate = useNavigate();
 

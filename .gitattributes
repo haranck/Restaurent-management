@@ -1,0 +1,5 @@
+*.js linguist-language=TypeScript
+*.jsx linguist-language=TypeScript
+eslint.config.js linguist-generated=true
+tailwind.config.js linguist-generated=true
+postcss.config.js linguist-generated=true

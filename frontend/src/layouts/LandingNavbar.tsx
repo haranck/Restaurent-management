@@ -1,8 +1,9 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import { UtensilsCrossed, ArrowRight } from "lucide-react";
 import { Button } from "../components/ui/button";
 
-const LandingNavbar = () => {
+const LandingNavbar: React.FC = () => {
     return (
         <nav className="fixed top-0 left-0 right-0 z-100 h-16 flex items-center px-6 md:px-10 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50 shadow-2xl shadow-black/50">
             {/* Brand */}

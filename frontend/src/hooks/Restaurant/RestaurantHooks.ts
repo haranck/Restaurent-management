@@ -4,15 +4,16 @@ import type { RootState } from "../../store/store";
 import { useEffect } from "react";
 import { setAllRestaurants, setMyRestaurants, addRestaurant } from "../../store/slice/restaurantSlice";
 import { createRestaurant, updateRestaurant, deleteRestaurant, fetchAllRestaurant, fetchMyRestaurants } from "../../services/RestaurantService/restaurantSerive";
-
+ 
 export const useCreateRestaurant = () => {
     const queryClient = useQueryClient();
     const dispatch = useDispatch();
     return useMutation({
         mutationFn: createRestaurant,
-        onSuccess: (data) => {
-            if (data?.restaurant) {
-                dispatch(addRestaurant(data.restaurant));
+        onSuccess: (response) => {
+            const newRestaurant = response.data?.restaurant;
+            if (newRestaurant) {
+                dispatch(addRestaurant(newRestaurant));
             }
             queryClient.invalidateQueries({ queryKey: ['restaurants'] });
             queryClient.invalidateQueries({ queryKey: ['my-restaurants'] });
@@ -50,10 +51,9 @@ export const useFetchAllRestaurant = () => {
     });
 
     useEffect(() => {
-        if (query.data?.restaurants) {
-            dispatch(setAllRestaurants(query.data.restaurants));
-        } else if (Array.isArray(query.data)) {
-            dispatch(setAllRestaurants(query.data));
+        const payload = query.data?.data?.restaurants;
+        if (payload) {
+            dispatch(setAllRestaurants(payload));
         }
     }, [query.data, dispatch]);
 
@@ -70,10 +70,9 @@ export const useFetchMyRestaurants = () => {
     });
 
     useEffect(() => {
-        if (query.data?.restaurants) {
-            dispatch(setMyRestaurants(query.data.restaurants));
-        } else if (Array.isArray(query.data)) {
-            dispatch(setMyRestaurants(query.data));
+        const payload = query.data?.data?.restaurants;
+        if (payload) {
+            dispatch(setMyRestaurants(payload));
         }
     }, [query.data, dispatch]);
 

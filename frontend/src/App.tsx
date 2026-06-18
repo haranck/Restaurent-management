@@ -1,8 +1,9 @@
+import React from "react";
 import { Toaster } from 'react-hot-toast'
 import { Routes, Route } from "react-router-dom";
 import UserRoutes from "./routes/UserRoutes";
 
-function App() {
+const App: React.FC = () => {
   return (
     <>
       <Toaster

@@ -1,15 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { UtensilsCrossed, User, LogOut, ChevronDown, Bell } from "lucide-react";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState } from "react";
 import { clearAuth } from "../store/slice/authSlice";
 import { clearToken } from "../store/slice/tokenSlice";
 import type { RootState } from "../store/store";
 import { Button } from "../components/ui/button";
 import { cn } from "../lib/utils";
 
-const Navbar = () => {
+const Navbar: React.FC = () => {
     const user = useSelector((state: RootState) => state.auth.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();

@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { UtensilsCrossed, Mail, Phone, MapPin } from "lucide-react";
+import React from "react";
 
-const Footer = () => {
+const Footer: React.FC = () => {
   return (
     <footer
       style={{

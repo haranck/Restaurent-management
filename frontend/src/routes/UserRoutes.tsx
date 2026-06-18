@@ -1,3 +1,4 @@
+import React from "react";
 import {Routes,Route} from "react-router-dom"
 import {SignupPage} from "../pages/Auth/SignupPage"
 import {LoginPage} from "../pages/Auth/LoginPage"
@@ -7,7 +8,7 @@ import {ShopsPage} from "../pages/ShopsPage"
 import ProtectedRoute from "./ProtectedRoute"
 import PublicRoute from "./PublicRoute"
 
-const UserRoutes =() =>{
+const UserRoutes: React.FC = () => {
     return (
         <Routes>
             <Route element={<PublicRoute />}>

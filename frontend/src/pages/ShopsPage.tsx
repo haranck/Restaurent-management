@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../layouts/Navbar";
@@ -7,19 +7,13 @@ import { CreateRestaurantModal } from "../components/modals/CreateRestaurantModa
 import { useFetchAllRestaurant } from "../hooks/Restaurant/RestaurantHooks";
 import type { RootState } from "../store/store";
 
-export const ShopsPage = () => {
+export const ShopsPage: React.FC = () => {
     const user = useSelector((state: RootState) => state.auth.user);
     const navigate = useNavigate();
     const [createOpen, setCreateOpen] = useState(false);
     const { data, isLoading, isError } = useFetchAllRestaurant();
 
-    const restaurants = Array.isArray(data?.restaurants)
-        ? data.restaurants
-        : Array.isArray(data?.data)
-            ? data.data
-            : Array.isArray(data)
-                ? data
-                : [];
+    const restaurants = data?.data?.restaurants || [];
 
     return (
         <div className="min-h-screen bg-[#050505] text-zinc-100 font-sans selection:bg-green-500/30">

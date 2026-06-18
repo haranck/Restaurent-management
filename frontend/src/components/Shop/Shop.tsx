@@ -22,8 +22,10 @@ import {
     SelectValue,
 } from "../ui/select";
 import { cn } from "../../lib/utils";
-import type { RootState } from "../../store/store";
-import type { Restaurant } from "../../store/slice/restaurantSlice";
+import type { RootState } from "../../store/store"; 
+// import type { Restaurant } from "../../store/slice/restaurantSlice";
+import type { Restaurant } from "@/types";
+
 
 interface Props {
     title?: string;
@@ -47,7 +49,9 @@ const foodTypeLabels: Record<string, string> = {
     BOTH: "🍽️ Both",
 };
 
-export const Shop = ({
+import React from "react";
+
+export const Shop: React.FC<Props> = ({
     title = "Restaurant Directory",
     subtitle = "Manage and oversee your entire culinary network.",
     restaurants = [],
@@ -55,7 +59,7 @@ export const Shop = ({
     isError,
     onOpenCreate,
     showAddButton = true,
-}: Props) => {
+}) => {
     const user = useSelector((state: RootState) => state.auth.user);
     const [search, setSearch] = useState("");
     const [filterType, setFilterType] = useState("All");

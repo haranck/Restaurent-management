@@ -32,7 +32,7 @@ interface UpdateRestaurantPayload {
     };
 }
 
-export const createRestaurant = async (data: CreateRestaurantPayload): Promise<IApiResponse<Restaurant>> => {
+export const createRestaurant = async (data: CreateRestaurantPayload): Promise<IApiResponse<{ restaurant: Restaurant }>> => {
     const formData = new FormData();
     formData.append("name", data.name);
     if (data.description) formData.append("description", data.description);
@@ -46,7 +46,7 @@ export const createRestaurant = async (data: CreateRestaurantPayload): Promise<I
     return response.data;
 };
 
-export const updateRestaurant = async (data: UpdateRestaurantPayload): Promise<IApiResponse<Restaurant>> => {
+export const updateRestaurant = async (data: UpdateRestaurantPayload): Promise<IApiResponse<{ restaurant: Restaurant }>> => {
     const { id, image, address, ...rest } = data;
     const formData = new FormData();
 
@@ -67,12 +67,12 @@ export const deleteRestaurant = async (id: string): Promise<IApiResponse> => {
     return response.data;
 };
 
-export const fetchAllRestaurant = async (): Promise<IApiResponse<Restaurant[]>> => {
+export const fetchAllRestaurant = async (): Promise<IApiResponse<{ restaurants: Restaurant[] }>> => {
     const response = await AxiosInstance.get("/restaurant/get-restaurant");
     return response.data;
 };
 
-export const fetchMyRestaurants = async (): Promise<IApiResponse<Restaurant[]>> => {
+export const fetchMyRestaurants = async (): Promise<IApiResponse<{ restaurants: Restaurant[] }>> => {
     const response = await AxiosInstance.get("/restaurant/get-my-restaurant");
     return response.data;
 };

@@ -1,5 +1,5 @@
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UtensilsCrossed, Plus, ArrowRight, Sparkles } from "lucide-react";
 import type { RootState } from "../store/store";
@@ -12,7 +12,7 @@ import { Card } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 
 
-export const HomePage = () => {
+export const HomePage: React.FC = () => {
     const user = useSelector((state: RootState) => state.auth.user);
     const restaurants = useSelector((state: RootState) => state.restaurant.myRestaurants);
     const navigate = useNavigate();

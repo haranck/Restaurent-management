@@ -1,3 +1,4 @@
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, UtensilsCrossed } from "lucide-react";
@@ -30,7 +31,7 @@ const inputBase: React.CSSProperties = {
   transition: "border 0.2s",
 };
 
-const LoginForm = ({ onSwitchToSignUp, onSubmit, isLoading }: LoginFormProps) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onSubmit, isLoading }) => {
   const {
     register,
     handleSubmit,

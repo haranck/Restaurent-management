@@ -1,3 +1,4 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "react-hot-toast";
@@ -7,7 +8,7 @@ import { setAuthUser } from "../../store/slice/authSlice";
 import { setAccessToken } from "../../store/slice/tokenSlice";
 import LoginForm, { type LoginFormData } from "../../components/Auth/LoginForm";
 
-export const LoginPage = () => {
+export const LoginPage: React.FC = () => {
     const { mutate: loginUser, isPending } = useLogin();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -17,11 +18,12 @@ export const LoginPage = () => {
             { email: data.email, password: data.password },
             {
                 onSuccess: (response) => {
-                    if (response?.user) {
-                        dispatch(setAuthUser(response.user));
+                    const authData = response.data;
+                    if (authData?.user) {
+                        dispatch(setAuthUser(authData.user));
                     }
-                    if (response?.accessToken) {
-                        dispatch(setAccessToken(response.accessToken));
+                    if (authData?.accessToken) {
+                        dispatch(setAccessToken(authData.accessToken));
                     }
                     toast.success("Welcome back!");
                     navigate("/home");
